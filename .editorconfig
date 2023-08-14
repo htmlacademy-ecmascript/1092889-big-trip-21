@@ -13,10 +13,18 @@ root = true
 [*]
 charset = utf-8
 end_of_line = lf
-indent_size = 2
-indent_style = space
+indent_style = tab
 insert_final_newline = true
 trim_trailing_whitespace = true
 
 [*.md]
 trim_trailing_whitespace = false
+
+[*.{yaml,yml}]
+# Табы в YAML не используются, только пробелы
+indent_style = space
+indent_size = 2
+
+[*.svg]
+# Векторные изображения могут храниться в минифицированном виде, лишняя строка не нужна
+insert_final_newline = false
