@@ -1,7 +1,7 @@
 # Проект «Большое путешествие»
 
 * Студент: [Даниил Фомин](https://up.htmlacademy.ru/ecmascript/21/user/1092889).
-* Наставник: `Неизвестно`.
+* Наставник: [Arthur Litovko](https://github.com/baileys-li).
 
 ---
 
