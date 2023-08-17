@@ -3,10 +3,6 @@ import {createElement} from '../render';
 export abstract class AbstractView<El extends Element = HTMLElement>{
 	#element: El | null = null;
 
-	protected constructor() {
-
-	}
-
 	get element() {
 		if (!this.#element) {
 			this.#element = createElement<El>(this.template);
