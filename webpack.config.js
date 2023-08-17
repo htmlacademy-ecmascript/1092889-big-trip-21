@@ -6,7 +6,7 @@ import CopyPlugin from "copy-webpack-plugin";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default {
-  entry: './src/main.js',
+  entry: './src/main.ts',
   output: {
     filename: 'bundle.[contenthash].js',
     path: resolve(__dirname, 'build'),
