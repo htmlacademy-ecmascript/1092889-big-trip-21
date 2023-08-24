@@ -1,3 +1,3 @@
-const getEventListItemTemplate = () => '<li class="trip-events__item"></li>';
+const getEventListItemTemplate = (content: string) => `<li class="trip-events__item">${content}</li>`;
 
 export {getEventListItemTemplate};
