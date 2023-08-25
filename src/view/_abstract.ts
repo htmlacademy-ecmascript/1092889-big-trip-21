@@ -14,6 +14,7 @@ export abstract class AbstractView<El extends Element = HTMLElement>{
 	protected abstract get template(): string
 
 	removeElement() {
+		this.element?.remove();
 		this.#element = null;
 	}
 }
