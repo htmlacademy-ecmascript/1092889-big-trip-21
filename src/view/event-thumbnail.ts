@@ -9,21 +9,21 @@ const enum Default {
 }
 
 interface EventThumbnailViewProps {
-	point: Point,
+	state: Point,
 	offers: Offer[],
 	destination: Destination,
 	handlers: SwitchEventsHandler;
 }
 
 class EventThumbnailView extends AbstractView<HTMLDivElement>{
-	#point: Point;
+	#state: Point;
 	#offers: Offer[];
 	#destination: Destination;
 	#editButton: HTMLButtonElement;
 	#handlers: SwitchEventsHandler;
 	constructor(props: EventThumbnailViewProps) {
 		super();
-		this.#point = props.point;
+		this.#state = props.state;
 		this.#offers = props.offers;
 		this.#destination = props.destination;
 		this.#handlers = props.handlers;
@@ -41,13 +41,13 @@ class EventThumbnailView extends AbstractView<HTMLDivElement>{
 	};
 
 	toggleEventListener = () => {
-		this.#handlers(this.#point.id, Default.SWITCH_KIND);
+		this.#handlers(this.#state.id, Default.SWITCH_KIND);
 	};
 
 	calculateDuration = ({dateFrom, dateTo}: Point) => getRelativeTime(dateFrom, dateTo);
 
 	get template(): string {
-		return getEventThumbnailTemplate(this.#point, this.#offers, this.#destination, this.calculateDuration(this.#point));
+		return getEventThumbnailTemplate(this.#state, this.#offers, this.#destination, this.calculateDuration(this.#state));
 	}
 
 	removeElement() {

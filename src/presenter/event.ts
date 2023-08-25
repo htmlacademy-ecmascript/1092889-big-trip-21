@@ -17,7 +17,7 @@ interface EventPresenterProps {
 export default class EventPresenter extends AbstractPresenter{
 	#container: EventListItemView;
 	#target: EventThumbnailView;
-	#point: Point;
+	#state: Point;
 	#offers: Offer[];
 	#destination: Destination;
 	#id: Point['id'];
@@ -26,10 +26,10 @@ export default class EventPresenter extends AbstractPresenter{
 	constructor(props: EventPresenterProps) {
 		super();
 		this.#container = props.container;
-		this.#point = props.point;
+		this.#state = props.point;
 		this.#offers = props.offers;
 		this.#destination = props.destination;
-		this.#id = this.#point.id;
+		this.#id = this.#state.id;
 		this.#handlers = props.handlers!;
 
 		this.#target = this.#getTarget();
@@ -45,7 +45,7 @@ export default class EventPresenter extends AbstractPresenter{
 	}
 
 	#getTarget = () => new EventThumbnailView({
-		point: this.#point,
+		state: this.#state,
 		offers: this.#offers,
 		destination: this.#destination,
 		handlers: this.#handlers
