@@ -12,7 +12,7 @@ const addOffersTemplate = (offers: Offer[]) => (
 const getEventThumbnailTemplate = (state: Point, offers: Offer[], destination: Destination, duration: string) => `<div class="event">
                     <time class="event__date" datetime="${state.dateFrom}">${state.dateFrom.format('MMM DD')}</time>
                     <div class="event__type">
-                      <img class="event__type-icon" width="42" height="42" src="img/icons/${state.type}.png" alt="Event type icon">
+                      <img class="event__type-icon" width="42" height="42" src="img/icons/${state.type.toLowerCase()}.png" alt="Event type icon">
                     </div>
                     <h3 class="event__title">${state.type} ${destination.name}</h3>
                     <div class="event__schedule">
