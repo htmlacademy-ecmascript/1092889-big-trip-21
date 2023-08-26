@@ -5,9 +5,9 @@ import {Destination, EventType} from '../contracts/contracts';
 const getEventTypesSelectTemplate = (eventTypes: EventType[]) => (
 	eventTypes.map((eventType) => (
 		`<div class="event__type-item">
-    		<input id="event-type-${eventType.toLowerCase()}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${eventType}">
-    		<label class="event__type-label  event__type-label--${eventType.toLowerCase()}" for="event-type-${eventType.toLowerCase()}-1">${eventType}</label>
-    	</div>`)).join(''));
+			<input id="event-type-${eventType.toLowerCase()}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${eventType}">
+			<label class="event__type-label  event__type-label--${eventType.toLowerCase()}" for="event-type-${eventType.toLowerCase()}-1">${eventType}</label>
+		</div>`)).join(''));
 
 const getOffersTemplate = (offers: StateFullOffers[]) => (
 	`<section class="event__section  event__section--offers">
@@ -15,7 +15,7 @@ const getOffersTemplate = (offers: StateFullOffers[]) => (
 		<div class="event__available-offers">
 			${(offers.map((offer) => (`
 				<div class="event__offer-selector">
-    				<input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.title}-${offer.id}" type="checkbox" name="event-offer-${offer.title}" ${(offer.checked) ? 'checked' : ''}>
+					<input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.title}-${offer.id}" type="checkbox" name="event-offer-${offer.title}" ${(offer.checked) ? 'checked' : ''}>
 					<label class="event__offer-label" for="event-offer-${offer.title}-${offer.id}">
 						<span class="event__offer-title">${offer.title}</span>
 						&plus;&euro;&nbsp;
@@ -31,15 +31,15 @@ const getDestinationTemplate = (destination: Destination) => (
 		<p class="event__destination-description">${destination.description}</p>
 		${(destination.pictures.length >= 1) ?
 		`<div class="event__photos-container">
-        	<div class="event__photos-tape">
-            	${destination.pictures.map((picture) => `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`).join('')}
-            </div>
-        </div>` : ''}
+			<div class="event__photos-tape">
+				${destination.pictures.map((picture) => `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`).join('')}
+			</div>
+		</div>` : ''}
 	</section>`);
 
 const getEventEditTemplate = ({state, eventTypes, destinationsNames, destination}: Omit<EventEditViewProps, 'offers'>, offers: StateFullOffers[]) =>
 	`<form class="event event--edit" action="#" method="post">
-                    <header class="event__header">
+		<header class="event__header">
                       <div class="event__type-wrapper">
                         <label class="event__type  event__type-btn" for="event-type-toggle-1">
                           <span class="visually-hidden">Choose event type</span>

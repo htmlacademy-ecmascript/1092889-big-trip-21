@@ -45,7 +45,7 @@ class EventListPresenter {
 		this.#destinationsModel = props.destinationsModel;
 
 		render(this.#eventList, this.#container);
-		this.createTripList();
+		this.#createTripList();
 		this.initListeners();
 	}
 
@@ -120,7 +120,7 @@ class EventListPresenter {
 		}
 	};
 
-	switchActiveElement = (element: AbstractPresenter | null = null) => {
+	switchActiveElement = (element: AbstractPresenter) => {
 		if(this.#activeElement) {
 			if(this.#pointsModel.points?.find((point) => point.id === this.#activeElement!.id)) {
 				this.switchEventsHandler(this.#activeElement!.id, 'Thumbnail');
@@ -137,14 +137,14 @@ class EventListPresenter {
 
 	};
 
-	private createTripList() {
+	#createTripList = ()=> {
 		const points = this.#pointsModel!.points ?? [];
 		for (let i = 0; i < 5; i++) {
 			if (points.length > 1) {
 				this.addEvent(points[i]);
 			}
 		}
-	}
+	};
 }
 
 export {EventListPresenter};
