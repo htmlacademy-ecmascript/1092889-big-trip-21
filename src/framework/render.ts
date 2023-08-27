@@ -1,3 +1,4 @@
+import AbstractStatefulView from './view/abstract-stateful-view';
 import AbstractView from './view/abstract-view';
 
 /**
@@ -10,7 +11,7 @@ function createElement<El extends Element = HTMLDivElement>(template: string) {
 	return newElement.firstElementChild as El;
 }
 
-function render(component: AbstractView<Element>, container: HTMLElement, place: InsertPosition = 'beforeend') {
+function render(component: AbstractView<Element> | AbstractStatefulView<Element>, container: HTMLElement, place: InsertPosition = 'beforeend') {
 	container.insertAdjacentElement(place, component.element);
 }
 

@@ -3,7 +3,7 @@ import {Destination, EventType, Point} from '../contracts/contracts';
 import PointsModel from '../model/points';
 import DestinationsModel from '../model/destinations';
 import OffersModel from '../model/offers';
-import {render} from '../render';
+import {remove, render} from '../framework/render';
 import {EventEditView} from '../view/event-edit';
 import {SwitchEventsHandler} from './event-list';
 import AbstractPresenter from './abstract';
@@ -56,8 +56,13 @@ export default class EventEditPresenter extends AbstractPresenter{
 	{
 		getOffersByType: this.getOffersByType,
 		getDestinationByName: this.getDestinationByName,
-		switchHandler: this.handlers
+		switchHandler: this.handlers,
+		updateState: this.updateState
 	});
+
+	updateState = (state: Point) => {
+		this.#pointsModel.update(state);
+	};
 
 	get id() {
 		return this.#id;
@@ -68,7 +73,7 @@ export default class EventEditPresenter extends AbstractPresenter{
 	}
 
 	remove() {
-		this.#target.removeElement();
+		remove(this.#target);
 	}
 
 }

@@ -1,6 +1,6 @@
 import {EventListItemView} from '../view/event-list-item';
 import {EventListView} from '../view/event-list';
-import {render} from '../render';
+import {render} from '../framework/render';
 import PointsModel from '../model/points';
 import OffersModel from '../model/offers';
 import DestinationsModel from '../model/destinations';
@@ -9,6 +9,10 @@ import {Point} from '../contracts/contracts';
 import EventEditPresenter from './event-edit';
 import EventPresenter from './event';
 import AbstractPresenter from './abstract';
+
+/* TODO
+*submit on edit and add events
+ */
 
 interface EventListPresenterProps {
 	container: HTMLElement,
@@ -92,6 +96,7 @@ class EventListPresenter {
 		this.#listItems.push({container: container, content: element});
 		this.switchActiveElement(element);
 		render(container, this.#eventList.element, 'afterbegin');
+		this.addEscapeHandler();
 	};
 
 	editEvent = (id: Point['id'], container: EventListItem) => {
@@ -105,6 +110,7 @@ class EventListPresenter {
 		});
 		container.content = element;
 		this.switchActiveElement(element);
+		this.addEscapeHandler();
 	};
 
 	switchEventsHandler = (id: Point['id'], kind: EventKinds) => {
@@ -114,13 +120,14 @@ class EventListPresenter {
 		if (kind === 'Edit') {
 			this.editEvent(id, wrapper);
 		} else if (kind === 'Thumbnail') {
+			this.removeEscapeHandler();
 			this.#activeElement = null;
 			const point = this.#pointsModel.getById(id);
 			this.addEvent(point, wrapper);
 		}
 	};
 
-	switchActiveElement = (element: AbstractPresenter) => {
+	switchActiveElement = (element: AbstractPresenter | null) => {
 		if(this.#activeElement) {
 			if(this.#pointsModel.points?.find((point) => point.id === this.#activeElement!.id)) {
 				this.switchEventsHandler(this.#activeElement!.id, 'Thumbnail');
@@ -130,6 +137,21 @@ class EventListPresenter {
 			this.#activeElement.remove();
 		}
 		this.#activeElement = element;
+	};
+
+	escapeHandler = (evt: KeyboardEvent) => {
+		if (evt.key === 'Escape') {
+			this.switchActiveElement(null);
+		}
+	};
+
+	addEscapeHandler = () => {
+		document.addEventListener('keydown',this.escapeHandler);
+
+	};
+
+	removeEscapeHandler = () => {
+		document.removeEventListener('keydown', this.escapeHandler);
 	};
 
 	deleteEvent = () => {
