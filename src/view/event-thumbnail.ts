@@ -1,4 +1,4 @@
-import {AbstractView} from './_abstract';
+import AbstractView from '../framework/view/abstract-view';
 import {getEventThumbnailTemplate} from '../template/event-thumbnail';
 import {Destination, Offer, Point} from '../contracts/contracts';
 import {getRelativeTime} from '../utils/time';

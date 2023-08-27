@@ -1,5 +1,5 @@
 import { createElement } from '../render';
-import './abstract-view.css';
+//import './abstract-view.css';
 
 /**
  * Функция, которая будет вызвана методом shake после завершения анимации

@@ -1,7 +1,7 @@
-import {AbstractView} from './_abstract';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import {getTripSortTemplate} from '../template/trip-sort';
 
-class TripSortView extends AbstractView<HTMLFormElement>{
+class TripSortView extends AbstractStatefulView<HTMLFormElement>{
 	constructor() {
 		super();
 	}

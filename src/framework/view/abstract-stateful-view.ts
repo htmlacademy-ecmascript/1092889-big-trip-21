@@ -2,7 +2,7 @@ import AbstractView from './abstract-view';
 
 export default class AbstractStatefulView<State, El extends Element = HTMLDivElement> extends AbstractView<El> {
 
-	_state = {} as State;
+	protected _state = {} as State;
 
 
 	updateElement(update: Partial<State>) {

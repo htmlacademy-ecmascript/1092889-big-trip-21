@@ -18,7 +18,9 @@ export default class PointsModel {
 	}
 
 
-	update() {
+	update(point: Point) {
+		this.#points?.filter((oldPoint) => oldPoint.id !== point.id);
+		this.#points?.push(point);
 
 	}
 

@@ -5,7 +5,7 @@ import {EventAddView} from '../view/event-add';
 import PointsModel from '../model/points';
 import DestinationsModel from '../model/destinations';
 import OffersModel from '../model/offers';
-import {render} from '../render';
+import { remove, render } from '../framework/render';
 import AbstractPresenter from './abstract';
 
 interface EventAddPresenterProps {
@@ -75,7 +75,7 @@ export default class EventAddPresenter extends AbstractPresenter{
 	}
 
 	remove() {
-		this.#target.removeElement();
+		remove(this.#target);
 	}
 
 }

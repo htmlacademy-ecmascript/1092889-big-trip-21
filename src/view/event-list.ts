@@ -1,4 +1,4 @@
-import {AbstractView} from './_abstract';
+import AbstractView from '../framework/view/abstract-view';
 import {getEventListTemplate} from '../template/event-list';
 
 class EventListView extends AbstractView<HTMLUListElement>{
