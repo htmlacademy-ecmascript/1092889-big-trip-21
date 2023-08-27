@@ -1,5 +1,3 @@
-import {Dayjs} from 'dayjs';
-
 type EventType = 'Flight'|'Taxi'|'Bus'|'Train'|'Ship'|'Drive'|'Check-in'|'Sightseeing'|'Restaurant'
 
 
@@ -39,8 +37,8 @@ type ResponsePoint = {
 type Point = {
 	id: string,
 	basePrice: number,
-	dateFrom: Dayjs,
-	dateTo: Dayjs,
+	dateFrom: Date,
+	dateTo: Date,
 	destination: Destination['id'],
 	isFavourite: boolean,
 	offers: Offer['id'][],

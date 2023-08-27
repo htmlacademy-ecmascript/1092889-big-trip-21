@@ -76,7 +76,8 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 
 	updateTypeHandler = (evt: Event) => {
 		const target = evt.target as HTMLInputElement;
-		this.updateElement({type: target.value as EventType});
+		this.#offers = [];
+		this.updateElement({type: target.value as EventType, offers: []});
 	};
 
 
