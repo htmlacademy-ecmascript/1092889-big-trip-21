@@ -19,13 +19,11 @@ export default class PointsModel {
 
 
 	update(point: Point) {
-		this.#points?.filter((oldPoint) => oldPoint.id !== point.id);
-		this.#points?.push(point);
-
+		this.#service!.updatePoint(point.id, point);
 	}
 
-	delete() {
-
+	delete(id: Point['id']) {
+		this.#service?.removePoint(id);
 	}
 }
 

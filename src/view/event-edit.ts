@@ -2,20 +2,21 @@ import {getEventEditTemplate} from '../template/event-edit';
 import {Destination, EventType, Offer, Point} from '../contracts/contracts';
 import {SwitchEventsHandler} from '../presenter/event-list';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
-import { getDestinationTemplate } from '../constants/templates';
+import { getDestinationTemplate } from '../model/templates/templates';
 
 interface EventEditHandlers {
 	getOffersByType: (eventType: EventType) => Offer[],
+	getOffersById: (...id: string[]) => Offer[],
 	getDestinationByName: (destinationName: Destination['name']) => Destination,
 	switchHandler: SwitchEventsHandler,
-	updateState:(state: Point) => void,
+	deletePoint: (id: Point['id']) => void,
+	updatePoint:(state: Point) => void,
 }
 interface EventEditViewProps {
 	state: Point,
 	eventTypes: EventType[],
 	destinationsNames: Destination['name'][];
 	destination: Destination,
-	offers: Offer[],
 }
 
 interface StateFullOffers extends Offer{
@@ -27,20 +28,22 @@ const enum Default {
 
 class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 	#destination: Destination;
-	#offers: Offer[];
 	#eventTypes: EventType[];
 	#destinationsNames: Destination['name'][];
 	#handlers: EventEditHandlers;
+	#offers: Offer[] = [];
+
+	#editForm: HTMLFormElement | null = null;
 	#switchButton: HTMLButtonElement | null = null;
 	#eventTypeSelect: HTMLInputElement[] | null = null;
 	#destinationInput: HTMLInputElement | null = null;
 	#priceInput: HTMLInputElement | null = null;
+	#offersCheckboxes: HTMLInputElement[] = [];
 
 	constructor(props: EventEditViewProps, handlers: EventEditHandlers) {
 		super();
 		this._setState(props.state);
 		this.#destination = props.destination;
-		this.#offers = props.offers;
 		this.#eventTypes = props.eventTypes;
 		this.#destinationsNames = props.destinationsNames;
 		this.#handlers = handlers;
@@ -48,6 +51,7 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 	}
 
 	getStatefulOffers = (): StateFullOffers[] => {
+		this.#offers = this.#handlers.getOffersById(...this._state.offers);
 		const statefulOffers = this.#offers.map((offer) => Object.assign(offer, {checked: true}));
 		const offersByType = this.#handlers.getOffersByType(this._state.type)
 			.filter((offer) => !this.#offers.includes(offer))
@@ -64,22 +68,27 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 		this.#eventTypeSelect = Array.from(this.element.querySelectorAll('.event__type-list input')!);
 		this.#destinationInput = this.element.querySelector('.event__input--destination');
 		this.#priceInput = this.element.querySelector('.event__input--price');
+		this.#offersCheckboxes = Array.from(this.element?.querySelectorAll('.event__offer-checkbox'));
 
 		if(!this.#switchButton || !this.#eventTypeSelect || !this.#destinationInput || !this.#priceInput) {
 			throw new Error('Elements not found');
 		}
 
 		this.#switchButton!.addEventListener('click', this.switchEventHandler);
-		this.#eventTypeSelect!.map((input) => input.addEventListener('click', this.updateEventTypeHandler));
-		this.#destinationInput!.addEventListener('change', this.updateDestiantionHandler);
+		this.#eventTypeSelect!.map((element) => element.addEventListener('click', this.updateEventTypeHandler));
+		this.#destinationInput!.addEventListener('change', this.updateDestinationHandler);
 		this.#priceInput!. addEventListener('change', this.updatePriceHandler);
+		this.element!.addEventListener('submit', this.formSubmitHandler);
+		this.element!.addEventListener('reset', this.formResetHandler);
 	};
 
 	removeListeners = () => {
 		this.#switchButton!.removeEventListener('click', this.switchEventHandler);
 		this.#eventTypeSelect!.map((input) => input.removeEventListener('click', this.updateEventTypeHandler));
-		this.#destinationInput!.removeEventListener('change', this.updateDestiantionHandler);
+		this.#destinationInput!.removeEventListener('change', this.updateDestinationHandler);
 		this.#priceInput!.removeEventListener('change', this.updatePriceHandler);
+		this.element!.removeEventListener('submit', this.formSubmitHandler);
+		this.element!.removeEventListener('reset', this.formResetHandler);
 	};
 
 	switchEventHandler = () => {
@@ -87,31 +96,48 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 	};
 
 	updateEventTypeHandler = (evt: Event) => {
+		evt.preventDefault();
 		const target = evt.target as HTMLInputElement;
-		this.#offers = [];
 		this.updateElement({type: target.value as EventType, offers: []});
 	};
 
-	updateDestiantionHandler = (evt: Event) => {
+	updateDestinationHandler = (evt: Event) => {
+		evt.preventDefault();
 		const target = evt.target as HTMLInputElement;
 		const value = target.value;
-		if (value === '') {
+		const offers = this.getCheckedOffers();
+
+		if (this.#destinationsNames.find((name) => name === value)) {
+			this.#destination = this.#handlers.getDestinationByName(target.value as Destination['name']);
+			this.updateElement({destination: this.#destination.id, offers: offers});
+		} else {
 			this.#destination = getDestinationTemplate();
-			this.updateElement({destination: this.#destination.id});
-			return;
+			this.updateElement({destination: this.#destination.id, offers: offers});
 		}
-		this.#destination = this.#handlers.getDestinationByName(target.value as Destination['name']);
-		this.updateElement({destination: this.#destination.id});
 	};
 
 	updatePriceHandler = (evt: Event) => {
+		evt.preventDefault();
 		const target = evt.target as HTMLInputElement;
-		this.updateElement({basePrice: Number(target.value)});
+		this.updateElement({basePrice: Number(target.value), offers: this.getCheckedOffers()});
 	};
 
-	updateOffersHandler = () => {};
+	getCheckedOffers = (): string[] | [] => {
+		const checkedOffers = this.#offersCheckboxes!.filter((element) => element.checked);
+		return (checkedOffers.length) ? checkedOffers!.map((element) => element.id.slice(-36)) : [];
+	};
 
-	saveEventHandler = () => {};
+	formSubmitHandler = (evt: Event) => {
+		evt.preventDefault();
+		this.updateElement({offers: this.getCheckedOffers()});
+		this.#handlers.updatePoint(this._state);
+		this.#handlers.switchHandler(this._state.id,Default.SWITCH_KIND);
+	};
+
+	formResetHandler = (evt: Event) => {
+		evt.preventDefault();
+		this.#handlers.deletePoint(this._state.id);
+	};
 
 	get template(): string {
 		return getEventEditTemplate(

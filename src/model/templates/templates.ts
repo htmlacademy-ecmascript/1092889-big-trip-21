@@ -1,4 +1,4 @@
-import { Destination } from '../contracts/contracts';
+import { Destination } from '../../contracts/contracts';
 
 const getDestinationTemplate = (): Destination => ({
 	id: '',

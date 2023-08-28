@@ -8,6 +8,10 @@ import {EventEditView} from '../view/event-edit';
 import {SwitchEventsHandler} from './event-list';
 import AbstractPresenter from './abstract';
 
+interface EditEventPresenterHandlers {
+	switchEvent: SwitchEventsHandler,
+	deleteEvent: (id: Point['id']) => void
+}
 
 interface EventEditPresenterProps {
 	container: EventListItemView,
@@ -15,7 +19,7 @@ interface EventEditPresenterProps {
 	pointsModel: PointsModel,
 	destinationsModel: DestinationsModel,
 	offersModel: OffersModel,
-	handlers: SwitchEventsHandler
+	handlers: EditEventPresenterHandlers
 }
 
 export default class EventEditPresenter extends AbstractPresenter{
@@ -26,7 +30,7 @@ export default class EventEditPresenter extends AbstractPresenter{
 	#pointsModel: PointsModel;
 	#destinationsModel: DestinationsModel;
 	#offersModel: OffersModel;
-	handlers: SwitchEventsHandler;
+	handlers: EditEventPresenterHandlers;
 
 	constructor(props: EventEditPresenterProps) {
 		super();
@@ -46,22 +50,30 @@ export default class EventEditPresenter extends AbstractPresenter{
 
 	getDestinationByName = (destinationName: Destination['name']) => this.#destinationsModel.getByName(destinationName);
 
+	getOffersById = (...id:string[]) => id.map((offerId) => this.#offersModel.getById(offerId));
 
 	getTarget = () => new EventEditView({
 		state: this.#state,
 		eventTypes: this.#offersModel.eventTypes,
 		destinationsNames: this.#destinationsModel.destinationsNames,
 		destination: this.#destinationsModel.getById(this.#state.destination),
-		offers: this.#state.offers.map(this.#offersModel.getById)},
+	},
 	{
 		getOffersByType: this.getOffersByType,
+		getOffersById: this.getOffersById,
 		getDestinationByName: this.getDestinationByName,
-		switchHandler: this.handlers,
-		updateState: this.updateState
+		switchHandler: this.handlers.switchEvent,
+		deletePoint: this.deletePoint,
+		updatePoint: this.updatePoint
 	});
 
-	updateState = (state: Point) => {
+	updatePoint = (state: Point) => {
 		this.#pointsModel.update(state);
+	};
+
+	deletePoint = (id: Point['id']) => {
+		this.#pointsModel.delete(id);
+		this.handlers.deleteEvent(id);
 	};
 
 	get id() {

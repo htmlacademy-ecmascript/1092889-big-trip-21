@@ -28,5 +28,14 @@ export default class MockService {
 	getDestinations() {
 		return this.#destinations;
 	}
+
+	updatePoint(id: Point['id'], newPoint: Point) {
+		const pointIndex = this.#points!.findIndex((point) => point.id === id);
+		this.#points![pointIndex] = newPoint;
+	}
+
+	removePoint(id: Point['id']){
+		this.#points = this.#points!.filter((point) => point.id !== id);
+	}
 }
 

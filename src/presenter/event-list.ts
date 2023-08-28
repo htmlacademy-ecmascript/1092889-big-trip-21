@@ -10,9 +10,6 @@ import EventEditPresenter from './event-edit';
 import EventPresenter from './event';
 import AbstractPresenter from './abstract';
 
-/* TODO
-*submit on edit and add events
- */
 
 interface EventListPresenterProps {
 	container: HTMLElement,
@@ -106,7 +103,10 @@ class EventListPresenter {
 			pointsModel: this.#pointsModel,
 			destinationsModel: this.#destinationsModel,
 			offersModel: this.#offersModel,
-			handlers: this.switchEventsHandler
+			handlers: {
+				switchEvent: this.switchEventsHandler,
+				deleteEvent: this.deleteEvent
+			}
 		});
 		container.content = element;
 		this.switchActiveElement(element);
@@ -154,18 +154,18 @@ class EventListPresenter {
 		document.removeEventListener('keydown', this.escapeHandler);
 	};
 
-	deleteEvent = () => {
-
-
+	deleteEvent = (id: Point['id']) => {
+		this.switchActiveElement(null);
+		const wrapper = this.#listItems.find((listItem) => listItem.content.id === id)!;
+		const element = wrapper.content;
+		element.remove();
+		wrapper.container.removeElement();
+		this.#listItems = this.#listItems.filter((listItem) => listItem.content.id !== id);
 	};
 
 	#createTripList = ()=> {
 		const points = this.#pointsModel!.points ?? [];
-		for (let i = 0; i < 5; i++) {
-			if (points.length > 1) {
-				this.addEvent(points[i]);
-			}
-		}
+		points.map((point) => this.addEvent(point));
 	};
 }
 
