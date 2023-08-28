@@ -1,7 +1,7 @@
 import {EventListItemView} from '../view/event-list-item';
 import {EventThumbnailView} from '../view/event-thumbnail';
 import {Destination, Offer, Point} from '../contracts/contracts';
-import {render} from '../render';
+import { remove, render } from '../framework/render';
 import {SwitchEventsHandler} from './event-list';
 import AbstractPresenter from './abstract';
 
@@ -56,7 +56,7 @@ export default class EventPresenter extends AbstractPresenter{
 	}
 
 	remove() {
-		this.#target.removeElement();
+		remove(this.#target);
 	}
 }
 

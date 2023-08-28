@@ -1,7 +1,7 @@
-import {AbstractView} from './_abstract';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import {getTripInfoTemplate} from '../template/trip-info';
 
-class TripInfoView extends AbstractView<HTMLElement>{
+class TripInfoView extends AbstractStatefulView<HTMLElement>{
 	constructor() {
 		super();
 	}

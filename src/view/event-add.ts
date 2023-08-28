@@ -1,4 +1,4 @@
-import {AbstractView} from './_abstract';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import {getEventAddTemplate} from '../template/event-add';
 import {Destination, EventType, Offer, Point, ResponseOffer} from '../contracts/contracts';
 import {StateFullOffers} from './event-edit';
@@ -15,7 +15,7 @@ interface EventAddViewProps {
 	state: Point,
 	handlers: EventAddHandlers
 }
-class EventAddView extends AbstractView<HTMLFormElement>{
+class EventAddView extends AbstractStatefulView<HTMLFormElement>{
 	#eventTypes: EventType[];
 	#destination: Destination | null = null;
 	#destinationsNames: Destination['name'][];

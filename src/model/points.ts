@@ -18,12 +18,12 @@ export default class PointsModel {
 	}
 
 
-	update() {
-
+	update(point: Point) {
+		this.#service!.updatePoint(point.id, point);
 	}
 
-	delete() {
-
+	delete(id: Point['id']) {
+		this.#service?.removePoint(id);
 	}
 }
 

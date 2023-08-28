@@ -64,8 +64,8 @@ const generateMockPoint = (destination: Destination, {type, offers}: ResponseOff
 	return ({
 		id: getRandomUUID(),
 		basePrice: generateRandomNumber(0,5000),
-		dateFrom: dates.dateFrom,
-		dateTo: dates.dateTo,
+		dateFrom: dates.dateFrom.toDate(),
+		dateTo: dates.dateTo.toDate(),
 		destination: destination.id,
 		isFavourite: generateRandomBoolean(),
 		offers: (offers.length >= 1) ? offers.map((offer) => offer.id) : [],

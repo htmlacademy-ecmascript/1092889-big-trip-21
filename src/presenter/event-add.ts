@@ -1,11 +1,10 @@
 import {EventListItemView} from '../view/event-list-item';
 import {Destination, EventType, Point} from '../contracts/contracts';
-import dayjs from 'dayjs';
 import {EventAddView} from '../view/event-add';
 import PointsModel from '../model/points';
 import DestinationsModel from '../model/destinations';
 import OffersModel from '../model/offers';
-import {render} from '../render';
+import { remove, render } from '../framework/render';
 import AbstractPresenter from './abstract';
 
 interface EventAddPresenterProps {
@@ -43,8 +42,8 @@ export default class EventAddPresenter extends AbstractPresenter{
 	#createNewState = (): Point => ({
 		id: crypto.randomUUID(),
 		basePrice: 0,
-		dateFrom: dayjs(),
-		dateTo: dayjs(),
+		dateFrom: new Date(),
+		dateTo: new Date(),
 		destination:'',
 		isFavourite: false,
 		offers: [],
@@ -75,7 +74,7 @@ export default class EventAddPresenter extends AbstractPresenter{
 	}
 
 	remove() {
-		this.#target.removeElement();
+		remove(this.#target);
 	}
 
 }

@@ -1,4 +1,5 @@
 import {Destination, Offer, Point} from '../contracts/contracts';
+import dayjs from 'dayjs';
 
 const addOffersTemplate = (offers: Offer[]) => (
 	`<h4 class="visually-hidden">Offers:</h4>
@@ -10,16 +11,16 @@ const addOffersTemplate = (offers: Offer[]) => (
 							</li>`)).join('')}
                     </ul>`);
 const getEventThumbnailTemplate = (state: Point, offers: Offer[], destination: Destination, duration: string) => `<div class="event">
-                    <time class="event__date" datetime="${state.dateFrom}">${state.dateFrom.format('MMM DD')}</time>
+                    <time class="event__date" datetime="${state.dateFrom}">${dayjs(state.dateFrom).format('MMM DD')}</time>
                     <div class="event__type">
                       <img class="event__type-icon" width="42" height="42" src="img/icons/${state.type.toLowerCase()}.png" alt="Event type icon">
                     </div>
                     <h3 class="event__title">${state.type} ${destination.name}</h3>
                     <div class="event__schedule">
                       <p class="event__time">
-                        <time class="event__start-time" datetime="${state.dateFrom}">${state.dateFrom.format('hh mm')}</time>
+                        <time class="event__start-time" datetime="${state.dateFrom}">${dayjs(state.dateFrom).format('hh mm')}</time>
                         &mdash;
-                        <time class="event__end-time" datetime="${state.dateTo}">${state.dateTo.format('hh mm')}</time>
+                        <time class="event__end-time" datetime="${state.dateTo}">${dayjs(state.dateTo).format('hh mm')}</time>
                       </p>
                       <p class="event__duration">${duration}</p>
                     </div>

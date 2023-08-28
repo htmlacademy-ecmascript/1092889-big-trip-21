@@ -1,7 +1,7 @@
-import {AbstractView} from './_abstract';
+import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import {getTripFilterTemplate} from '../template/trip-filter';
 
-class TripFilterView extends AbstractView<HTMLFormElement>{
+class TripFilterView extends AbstractStatefulView<HTMLFormElement>{
 	constructor() {
 		super();
 	}

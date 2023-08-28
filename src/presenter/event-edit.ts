@@ -3,11 +3,15 @@ import {Destination, EventType, Point} from '../contracts/contracts';
 import PointsModel from '../model/points';
 import DestinationsModel from '../model/destinations';
 import OffersModel from '../model/offers';
-import {render} from '../render';
+import {remove, render} from '../framework/render';
 import {EventEditView} from '../view/event-edit';
 import {SwitchEventsHandler} from './event-list';
 import AbstractPresenter from './abstract';
 
+interface EditEventPresenterHandlers {
+	switchEvent: SwitchEventsHandler,
+	deleteEvent: (id: Point['id']) => void
+}
 
 interface EventEditPresenterProps {
 	container: EventListItemView,
@@ -15,7 +19,7 @@ interface EventEditPresenterProps {
 	pointsModel: PointsModel,
 	destinationsModel: DestinationsModel,
 	offersModel: OffersModel,
-	handlers: SwitchEventsHandler
+	handlers: EditEventPresenterHandlers
 }
 
 export default class EventEditPresenter extends AbstractPresenter{
@@ -26,7 +30,7 @@ export default class EventEditPresenter extends AbstractPresenter{
 	#pointsModel: PointsModel;
 	#destinationsModel: DestinationsModel;
 	#offersModel: OffersModel;
-	handlers: SwitchEventsHandler;
+	handlers: EditEventPresenterHandlers;
 
 	constructor(props: EventEditPresenterProps) {
 		super();
@@ -38,26 +42,39 @@ export default class EventEditPresenter extends AbstractPresenter{
 		this.#id = this.#state.id;
 		this.handlers = props.handlers;
 
-		this.#target = this.getTarget();
+		this.#target = this.#getTarget();
 		this.render();
 	}
 
-	getOffersByType = (eventType: EventType) => this.#offersModel.getByType(eventType)!.offers;
+	#getOffersByType = (eventType: EventType) => this.#offersModel.getByType(eventType)!.offers;
 
-	getDestinationByName = (destinationName: Destination['name']) => this.#destinationsModel.getByName(destinationName);
+	#getDestinationByName = (destinationName: Destination['name']) => this.#destinationsModel.getByName(destinationName);
 
+	#getOffersById = (...id:string[]) => id.map((offerId) => this.#offersModel.getById(offerId));
 
-	getTarget = () => new EventEditView({
+	#getTarget = () => new EventEditView({
 		state: this.#state,
 		eventTypes: this.#offersModel.eventTypes,
 		destinationsNames: this.#destinationsModel.destinationsNames,
 		destination: this.#destinationsModel.getById(this.#state.destination),
-		offers: this.#state.offers.map(this.#offersModel.getById)},
+	},
 	{
-		getOffersByType: this.getOffersByType,
-		getDestinationByName: this.getDestinationByName,
-		switchHandler: this.handlers
+		getOffersByType: this.#getOffersByType,
+		getOffersById: this.#getOffersById,
+		getDestinationByName: this.#getDestinationByName,
+		switchHandler: this.handlers.switchEvent,
+		deletePoint: this.#deletePoint,
+		updatePoint: this.#updatePoint
 	});
+
+	#updatePoint = (state: Point) => {
+		this.#pointsModel.update(state);
+	};
+
+	#deletePoint = (id: Point['id']) => {
+		this.#pointsModel.delete(id);
+		this.handlers.deleteEvent(id);
+	};
 
 	get id() {
 		return this.#id;
@@ -68,7 +85,7 @@ export default class EventEditPresenter extends AbstractPresenter{
 	}
 
 	remove() {
-		this.#target.removeElement();
+		remove(this.#target);
 	}
 
 }
