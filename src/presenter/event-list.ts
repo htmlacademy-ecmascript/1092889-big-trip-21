@@ -47,14 +47,14 @@ class EventListPresenter {
 
 		render(this.#eventList, this.#container);
 		this.#createTripList();
-		this.initListeners();
+		this.#initListeners();
 	}
 
-	initListeners = () => {
-		this.#addButton.addEventListener('click', this.newEvent);
+	#initListeners = () => {
+		this.#addButton.addEventListener('click', this.#newEvent);
 	};
 
-	addEvent = (point: Point, wrapper: EventListItem | null = null) => {
+	#addEvent = (point: Point, wrapper: EventListItem | null = null) => {
 		const destination = this.#destinationsModel.getById(point.destination);
 		const offers = point.offers.map(this.#offersModel.getById);
 
@@ -65,7 +65,7 @@ class EventListPresenter {
 				point: point,
 				destination: destination,
 				offers: offers,
-				handlers: this.switchEventsHandler
+				handlers: this.#switchEventsHandler
 			});
 			this.#listItems.push({container: container, content: element});
 			render(container, this.#eventList.element);
@@ -75,13 +75,13 @@ class EventListPresenter {
 				point: point,
 				destination: destination,
 				offers: offers,
-				handlers: this.switchEventsHandler
+				handlers: this.#switchEventsHandler
 			});
 			wrapper.content = element;
 		}
 	};
 
-	newEvent = () => {
+	#newEvent = () => {
 		const container = new EventListItemView();
 		const element = new EventAddPresenter({
 			container: container,
@@ -91,12 +91,12 @@ class EventListPresenter {
 			handlers: ()=> {}
 		});
 		this.#listItems.push({container: container, content: element});
-		this.switchActiveElement(element);
+		this.#switchActiveElement(element);
 		render(container, this.#eventList.element, 'afterbegin');
-		this.addEscapeHandler();
+		this.#addEscapeHandler();
 	};
 
-	editEvent = (id: Point['id'], container: EventListItem) => {
+	#editEvent = (id: Point['id'], container: EventListItem) => {
 		const element = new EventEditPresenter({
 			container: container.container,
 			state: this.#pointsModel.getById(id),
@@ -104,33 +104,33 @@ class EventListPresenter {
 			destinationsModel: this.#destinationsModel,
 			offersModel: this.#offersModel,
 			handlers: {
-				switchEvent: this.switchEventsHandler,
-				deleteEvent: this.deleteEvent
+				switchEvent: this.#switchEventsHandler,
+				deleteEvent: this.#deleteEvent
 			}
 		});
 		container.content = element;
-		this.switchActiveElement(element);
-		this.addEscapeHandler();
+		this.#switchActiveElement(element);
+		this.#addEscapeHandler();
 	};
 
-	switchEventsHandler = (id: Point['id'], kind: EventKinds) => {
+	#switchEventsHandler = (id: Point['id'], kind: EventKinds) => {
 		const wrapper = this.#listItems.find((listItem) => listItem.content.id === id)!;
 		const element = wrapper.content;
 		element.remove();
 		if (kind === 'Edit') {
-			this.editEvent(id, wrapper);
+			this.#editEvent(id, wrapper);
 		} else if (kind === 'Thumbnail') {
-			this.removeEscapeHandler();
+			this.#removeEscapeHandler();
 			this.#activeElement = null;
 			const point = this.#pointsModel.getById(id);
-			this.addEvent(point, wrapper);
+			this.#addEvent(point, wrapper);
 		}
 	};
 
-	switchActiveElement = (element: AbstractPresenter | null) => {
+	#switchActiveElement = (element: AbstractPresenter | null) => {
 		if(this.#activeElement) {
 			if(this.#pointsModel.points?.find((point) => point.id === this.#activeElement!.id)) {
-				this.switchEventsHandler(this.#activeElement!.id, 'Thumbnail');
+				this.#switchEventsHandler(this.#activeElement!.id, 'Thumbnail');
 				this.#activeElement = element;
 				return;
 			}
@@ -139,23 +139,23 @@ class EventListPresenter {
 		this.#activeElement = element;
 	};
 
-	escapeHandler = (evt: KeyboardEvent) => {
+	#escapeHandler = (evt: KeyboardEvent) => {
 		if (evt.key === 'Escape') {
-			this.switchActiveElement(null);
+			this.#switchActiveElement(null);
 		}
 	};
 
-	addEscapeHandler = () => {
-		document.addEventListener('keydown',this.escapeHandler);
+	#addEscapeHandler = () => {
+		document.addEventListener('keydown',this.#escapeHandler);
 
 	};
 
-	removeEscapeHandler = () => {
-		document.removeEventListener('keydown', this.escapeHandler);
+	#removeEscapeHandler = () => {
+		document.removeEventListener('keydown', this.#escapeHandler);
 	};
 
-	deleteEvent = (id: Point['id']) => {
-		this.switchActiveElement(null);
+	#deleteEvent = (id: Point['id']) => {
+		this.#switchActiveElement(null);
 		const wrapper = this.#listItems.find((listItem) => listItem.content.id === id)!;
 		const element = wrapper.content;
 		element.remove();
@@ -165,7 +165,7 @@ class EventListPresenter {
 
 	#createTripList = ()=> {
 		const points = this.#pointsModel!.points ?? [];
-		points.map((point) => this.addEvent(point));
+		points.map((point) => this.#addEvent(point));
 	};
 }
 
