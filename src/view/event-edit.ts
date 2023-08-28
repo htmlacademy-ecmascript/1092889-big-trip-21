@@ -2,6 +2,7 @@ import {getEventEditTemplate} from '../template/event-edit';
 import {Destination, EventType, Offer, Point} from '../contracts/contracts';
 import {SwitchEventsHandler} from '../presenter/event-list';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
+import { getDestinationTemplate } from '../constants/templates';
 
 interface EventEditHandlers {
 	getOffersByType: (eventType: EventType) => Offer[],
@@ -32,6 +33,8 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 	#handlers: EventEditHandlers;
 	#switchButton: HTMLButtonElement | null = null;
 	#eventTypeSelect: HTMLInputElement[] | null = null;
+	#destinationInput: HTMLInputElement | null = null;
+	#priceInput: HTMLInputElement | null = null;
 
 	constructor(props: EventEditViewProps, handlers: EventEditHandlers) {
 		super();
@@ -41,45 +44,74 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 		this.#eventTypes = props.eventTypes;
 		this.#destinationsNames = props.destinationsNames;
 		this.#handlers = handlers;
-		this.initListeners();
+		this.initHandlers();
 	}
 
-	getStateFullOffers = (): StateFullOffers[] => {
-		const stateFullOffers = this.#offers.map((offer) => Object.assign(offer, {checked: true}));
+	getStatefulOffers = (): StateFullOffers[] => {
+		const statefulOffers = this.#offers.map((offer) => Object.assign(offer, {checked: true}));
 		const offersByType = this.#handlers.getOffersByType(this._state.type)
 			.filter((offer) => !this.#offers.includes(offer))
 			.map((offer) => Object.assign((offer), {checked: false}));
-		return [...stateFullOffers,...offersByType];
+		return [...statefulOffers,...offersByType];
 	};
 
 	_restoreHandlers(): void {
-		this.initListeners();
+		this.initHandlers();
 	}
 
-	initListeners = () => {
+	initHandlers = () => {
 		this.#switchButton = this.element.querySelector('.event__rollup-btn')!;
 		this.#eventTypeSelect = Array.from(this.element.querySelectorAll('.event__type-list input')!);
-		if(!this.#switchButton || !this.#eventTypeSelect) {
-			throw new Error('Button element not found');
+		this.#destinationInput = this.element.querySelector('.event__input--destination');
+		this.#priceInput = this.element.querySelector('.event__input--price');
+
+		if(!this.#switchButton || !this.#eventTypeSelect || !this.#destinationInput || !this.#priceInput) {
+			throw new Error('Elements not found');
 		}
-		this.#switchButton!.addEventListener('click', this.toggleEventListener);
-		this.#eventTypeSelect!.map((input) => input.addEventListener('click', this.updateTypeHandler));
+
+		this.#switchButton!.addEventListener('click', this.switchEventHandler);
+		this.#eventTypeSelect!.map((input) => input.addEventListener('click', this.updateEventTypeHandler));
+		this.#destinationInput!.addEventListener('change', this.updateDestiantionHandler);
+		this.#priceInput!. addEventListener('change', this.updatePriceHandler);
 	};
 
 	removeListeners = () => {
-		this.#switchButton!.removeEventListener('click', this.toggleEventListener);
+		this.#switchButton!.removeEventListener('click', this.switchEventHandler);
+		this.#eventTypeSelect!.map((input) => input.removeEventListener('click', this.updateEventTypeHandler));
+		this.#destinationInput!.removeEventListener('change', this.updateDestiantionHandler);
+		this.#priceInput!.removeEventListener('change', this.updatePriceHandler);
 	};
 
-	toggleEventListener = () => {
+	switchEventHandler = () => {
 		this.#handlers.switchHandler(this._state.id, Default.SWITCH_KIND);
 	};
 
-	updateTypeHandler = (evt: Event) => {
+	updateEventTypeHandler = (evt: Event) => {
 		const target = evt.target as HTMLInputElement;
 		this.#offers = [];
 		this.updateElement({type: target.value as EventType, offers: []});
 	};
 
+	updateDestiantionHandler = (evt: Event) => {
+		const target = evt.target as HTMLInputElement;
+		const value = target.value;
+		if (value === '') {
+			this.#destination = getDestinationTemplate();
+			this.updateElement({destination: this.#destination.id});
+			return;
+		}
+		this.#destination = this.#handlers.getDestinationByName(target.value as Destination['name']);
+		this.updateElement({destination: this.#destination.id});
+	};
+
+	updatePriceHandler = (evt: Event) => {
+		const target = evt.target as HTMLInputElement;
+		this.updateElement({basePrice: Number(target.value)});
+	};
+
+	updateOffersHandler = () => {};
+
+	saveEventHandler = () => {};
 
 	get template(): string {
 		return getEventEditTemplate(
@@ -89,7 +121,7 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 				destinationsNames: this.#destinationsNames,
 				destination: this.#destination
 			},
-			this.getStateFullOffers());
+			this.getStatefulOffers());
 	}
 
 	removeElement() {
