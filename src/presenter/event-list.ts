@@ -119,12 +119,12 @@ class EventListPresenter {
 		element.remove();
 		if (kind === 'Edit') {
 			this.#editEvent(id, wrapper);
-		} else if (kind === 'Thumbnail') {
-			this.#removeEscapeHandler();
-			this.#activeElement = null;
-			const point = this.#pointsModel.getById(id);
-			this.#addEvent(point, wrapper);
+			return;
 		}
+		this.#removeEscapeHandler();
+		this.#activeElement = null;
+		const point = this.#pointsModel.getById(id);
+		this.#addEvent(point, wrapper);
 	};
 
 	#switchActiveElement = (element: AbstractPresenter | null) => {
@@ -164,7 +164,7 @@ class EventListPresenter {
 	};
 
 	#createTripList = ()=> {
-		const points = this.#pointsModel!.points ?? [];
+		const points = this.#pointsModel!.points!;
 		points.map((point) => this.#addEvent(point));
 	};
 }

@@ -10,7 +10,7 @@ export default class OffersModel {
 		this.#service = service;
 		this.#responses = this.#service.getOffers()!;
 		this.#eventTypes = Array.from(new Set(this.#responses.map((value) => value.type)));
-		this.#offers = this.getMappedOffers();
+		this.#offers = this.#getMappedOffers();
 	}
 
 	get eventTypes() {
@@ -19,7 +19,7 @@ export default class OffersModel {
 
 	getByType = (type: EventType) => this.#responses.find((offer) => offer.type === type);
 
-	private getMappedOffers = () => {
+	#getMappedOffers = () => {
 		const offers = this.#responses.flatMap((response) => response.offers);
 		return new Map(offers.map((offer) => [offer.id,offer]));
 	};
