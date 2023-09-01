@@ -1,12 +1,9 @@
-import {render} from './framework/render';
-import {TripInfoView} from './view/trip-info';
-import {TripFilterView} from './view/trip-filter';
-import {TripSortView} from './view/trip-sort';
-import {EventListPresenter} from './presenter/event-list';
+
 import MockService from './service/mock';
 import PointsModel from './model/points';
 import OffersModel from './model/offers';
 import DestinationsModel from './model/destinations';
+import ControllersPresenter from './presenter/controllers';
 
 const pageHeader = document.querySelector('.trip-main') as HTMLDivElement;
 const pageEventsContainer = document.querySelector('.trip-events') as HTMLElement;
@@ -18,10 +15,7 @@ if (!pageHeader || !pageFiltersContainer || ! pageEventsContainer) {
 }
 const mockService = new MockService();
 
-render(new TripInfoView(), pageHeader, 'afterbegin');
-render(new TripFilterView(), pageFiltersContainer);
-render(new TripSortView(), pageEventsContainer);
-new EventListPresenter({container: pageEventsContainer,
+new ControllersPresenter({
 	pointsModel: new PointsModel(mockService),
 	offersModel: new OffersModel(mockService),
 	destinationsModel: new DestinationsModel(mockService)});

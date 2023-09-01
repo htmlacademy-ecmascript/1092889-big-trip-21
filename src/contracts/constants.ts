@@ -35,4 +35,8 @@ const DESTINATIONS: Destination['name'][] = [
 	'Hong Kong'
 ];
 
-export {EVENT_TYPES, DESTINATIONS};
+type FILTER_TYPE = 'everything' | 'future' | 'present' | 'past';
+
+type SORT_TYPE = 'sort-day' | 'sort-time' | 'sort-price'
+
+export {EVENT_TYPES, DESTINATIONS, FILTER_TYPE, SORT_TYPE};
