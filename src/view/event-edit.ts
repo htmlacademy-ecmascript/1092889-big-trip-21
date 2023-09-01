@@ -91,13 +91,13 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 		const endDate = this.element.querySelector('#event-end-time-1');
 
 		this.#startDate = flatpickr(startDate!, {
-			dateFormat: 'y/m/d h:m',
+			dateFormat: 'y/m/d H:i',
 			defaultDate: new Date(this._state.dateFrom),
 			enableTime: true,
 			onClose: this.startDateChange
 		});
 		this.#endDate = flatpickr(endDate!, {
-			dateFormat: 'y/m/d h:m',
+			dateFormat: 'y/m/d H:i',
 			minDate: new Date(this._state.dateFrom),
 			defaultDate: new Date(this._state.dateTo),
 			enableTime: true,
@@ -107,7 +107,7 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 
 	startDateChange = (dateObj: Date[]) => {
 		if (dateObj[0].getTime() > this._state.dateTo.getTime()) {
-			this.updateElement({dateFrom: dateObj[0], dateTo: dateObj[0], offers: this.#getCheckedOffers()});
+			this.updateElement({dateFrom: dateObj[0], dateTo:  dateObj[0], offers: this.#getCheckedOffers()});
 			return;
 		}
 		this.updateElement({dateFrom: dateObj[0], offers: this.#getCheckedOffers()});
@@ -125,13 +125,6 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 		this.element!.removeEventListener('submit', this.#formSubmitHandler);
 		this.element!.removeEventListener('reset', this.#formResetHandler);
 	};
-
-	/*createDatePickers = () => {
-
-		startTime;
-
-		endTime;
-	};*/
 
 
 	#switchEventHandler = () => {
@@ -172,6 +165,10 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 
 	#formSubmitHandler = (evt: Event) => {
 		evt.preventDefault();
+		if(this.#destination.name === '') {
+			this.shake();
+			return;
+		}
 		this.updateElement({offers: this.#getCheckedOffers()});
 		this.#handlers.updatePoint(this._state);
 		this.#handlers.switchHandler(this._state.id,Default.SWITCH_KIND);

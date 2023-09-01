@@ -27,7 +27,7 @@ const descriptions =
 		'Nunc fermentum tortor ac porta dapibus.',
 		'In rutrum ac purus sit amet tempus.'];
 
-const getTimePairs = getTimePairsInit(dayjs());
+const getTimePairs = getTimePairsInit(dayjs().subtract(12, 'day'));
 
 const generatePictureUrl = (city: string) => `https://loremflickr.com/320/240/${city}?random=${crypto.randomUUID()}`;
 const getRandomUUID = () => crypto.randomUUID();

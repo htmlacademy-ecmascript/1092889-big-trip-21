@@ -24,6 +24,7 @@ export default class PointsModel {
 
 	delete(id: Point['id']) {
 		this.#service?.removePoint(id);
+		this.#points = this.#service!.getPoints();
 	}
 }
 

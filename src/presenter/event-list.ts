@@ -13,9 +13,13 @@ import AbstractPresenter from './abstract';
 
 interface EventListPresenterProps {
 	container: HTMLElement,
+	points: Point[],
 	pointsModel: PointsModel,
 	offersModel: OffersModel,
-	destinationsModel: DestinationsModel
+	destinationsModel: DestinationsModel,
+	handlers: {
+		deletePoint :(id: Point['id']) => void;
+	}
 }
 
 
@@ -32,25 +36,32 @@ class EventListPresenter {
 	#eventList = new EventListView();
 	#listItems: EventListItem[] = [];
 
+	#points: Point[];
 	#pointsModel: PointsModel;
 	#offersModel: OffersModel;
 	#destinationsModel: DestinationsModel;
+
+	#handlers: {
+		deletePoint :(id: Point['id']) => void;
+	};
 
 	#addButton = document.querySelector('.trip-main__event-add-btn')!;
 
 	#activeElement: AbstractPresenter | null = null;
 	constructor(props: EventListPresenterProps) {
+		this.#points = props.points;
 		this.#container = props.container;
 		this.#pointsModel = props.pointsModel;
 		this.#offersModel = props.offersModel;
 		this.#destinationsModel = props.destinationsModel;
 
 		render(this.#eventList, this.#container);
-		this.#createTripList();
-		this.#initListeners();
+		this.updateTripList(this.#points);
+		this.#handlers = props.handlers;
+		this.#initHandlers();
 	}
 
-	#initListeners = () => {
+	#initHandlers = () => {
 		this.#addButton.addEventListener('click', this.#newEvent);
 	};
 
@@ -161,11 +172,20 @@ class EventListPresenter {
 		element.remove();
 		wrapper.container.removeElement();
 		this.#listItems = this.#listItems.filter((listItem) => listItem.content.id !== id);
+		this.#handlers.deletePoint(id);
+		this.#points = this.#points.filter((point) => point.id !== id);
 	};
 
-	#createTripList = ()=> {
-		const points = this.#pointsModel!.points!;
-		points.map((point) => this.#addEvent(point));
+	updateTripList = (newPoints: Point[])=> {
+		if (this.#listItems.length){
+			this.#listItems.forEach((listItem) => {
+				listItem.container.removeElement();
+				listItem.content.remove();
+			});
+			this.#listItems = [];
+		}
+		this.#points = newPoints;
+		this.#points.map((point) => this.#addEvent(point));
 	};
 }
 
