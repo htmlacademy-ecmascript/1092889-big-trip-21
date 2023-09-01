@@ -133,7 +133,7 @@ export default class ControllersPresenter {
 	filterPoints = (value: FILTER_TYPE) => {
 		const currentTime = new Date();
 		const filterDefault = () => this.#pointsModel!.points!;
-		const filterPresent = () => this.#pointsModel!.points!.filter((point) => point.dateFrom.toDateString() === currentTime.toDateString());
+		const filterPresent = () => this.#pointsModel!.points!.filter((point) => point.dateTo.getTime() >= currentTime.getTime() && point.dateFrom.getTime() <= currentTime.getTime());
 		const filterFuture = () => this.#pointsModel!.points!.filter((point) => point.dateFrom.getTime() > currentTime.getTime());
 		const filterPast = () => this.#pointsModel!.points!.filter((point) => point.dateFrom.getTime() < currentTime.getTime());
 
@@ -152,11 +152,11 @@ export default class ControllersPresenter {
 	sortPoints = (value: SORT_TYPE) => {
 		const sortByPrice = (priceOne: Point, priceTwo: Point) => priceOne.basePrice - priceTwo.basePrice;
 		const sortByTime = (timeOne: Point, timeTwo: Point) => (timeOne.dateTo.getTime() - timeOne.dateFrom.getTime()) - (timeTwo.dateTo.getTime() - timeTwo.dateFrom.getTime());
-		const sortByDay = (dayOne: Point, dayTwo: Point) => dayOne.dateFrom.getTime() - dayTwo.dateFrom.getTime();
+		const sortByDate = (dayOne: Point, dayTwo: Point) => dayOne.dateFrom.getTime() - dayTwo.dateFrom.getTime();
 
 		const sorts:Map<SORT_TYPE, (a: Point,b: Point) => number> = new Map ([
 			['sort-price', sortByPrice],
-			['sort-day', sortByDay],
+			['sort-day', sortByDate],
 			['sort-time', sortByTime]
 		]);
 
