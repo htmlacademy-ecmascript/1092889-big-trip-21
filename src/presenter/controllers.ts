@@ -55,12 +55,6 @@ export default class ControllersPresenter {
 	#pointsModelChangeHandler = (updateType: unknown, update: unknown) => {
 		this.#setState({currentPoints: update as Point[]});
 		switch (updateType) {
-			case 'PATCH': {
-				break;
-			}
-			case 'MINOR' : {
-				break;
-			}
 			case 'MAJOR' : {
 				this.refreshInfo();
 				this.#setState({currentPoints: this.#filter!.getFilteredPoints('everything')});
