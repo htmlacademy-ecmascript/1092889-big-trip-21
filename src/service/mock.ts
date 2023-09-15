@@ -29,9 +29,14 @@ export default class MockService {
 		return this.#destinations;
 	}
 
+	addPoint(point: Omit<Point,'id'>) {
+		this.#points!.push({...point, id: crypto.randomUUID()});
+	}
+
 	updatePoint(id: Point['id'], newPoint: Point) {
 		const pointIndex = this.#points!.findIndex((point) => point.id === id);
 		this.#points![pointIndex] = newPoint;
+		return this.#points![pointIndex];
 	}
 
 	removePoint(id: Point['id']){

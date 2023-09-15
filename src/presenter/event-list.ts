@@ -45,8 +45,6 @@ class EventListPresenter {
 		deletePoint :(id: Point['id']) => void;
 	};
 
-	#addButton = document.querySelector('.trip-main__event-add-btn')!;
-
 	#activeElement: AbstractPresenter | null = null;
 	constructor(props: EventListPresenterProps) {
 		this.#points = props.points;
@@ -58,12 +56,8 @@ class EventListPresenter {
 		render(this.#eventList, this.#container);
 		this.updateTripList(this.#points);
 		this.#handlers = props.handlers;
-		this.#initHandlers();
+		this.#pointsModel.addObserver(this.#pointsModelChangeHandler as (updateType: unknown, update: unknown) => void);
 	}
-
-	#initHandlers = () => {
-		this.#addButton.addEventListener('click', this.#newEvent);
-	};
 
 	#addEvent = (point: Point, wrapper: EventListItem | null = null) => {
 		const destination = this.#destinationsModel.getById(point.destination);
@@ -76,7 +70,10 @@ class EventListPresenter {
 				point: point,
 				destination: destination,
 				offers: offers,
-				handlers: this.#switchEventsHandler
+				handlers: {
+					switchEvent: this.#switchEventsHandler,
+					updateFavourite: this.#pointsModel.updateFavorite
+				}
 			});
 			this.#listItems.push({container: container, content: element});
 			render(container, this.#eventList.element);
@@ -86,20 +83,25 @@ class EventListPresenter {
 				point: point,
 				destination: destination,
 				offers: offers,
-				handlers: this.#switchEventsHandler
+				handlers: {
+					switchEvent: this.#switchEventsHandler,
+					updateFavourite: this.#pointsModel.updateFavorite
+				}
 			});
 			wrapper.content = element;
 		}
 	};
 
-	#newEvent = () => {
+	newEvent = () => {
 		const container = new EventListItemView();
 		const element = new EventAddPresenter({
 			container: container,
 			pointsModel: this.#pointsModel,
 			destinationsModel: this.#destinationsModel,
 			offersModel: this.#offersModel,
-			handlers: ()=> {}
+			handlers: {
+				cancelEventAdd: this.#switchActiveElement
+			}
 		});
 		this.#listItems.push({container: container, content: element});
 		this.#switchActiveElement(element);
@@ -151,8 +153,11 @@ class EventListPresenter {
 	};
 
 	#escapeHandler = (evt: KeyboardEvent) => {
-		if (evt.key === 'Escape') {
-			this.#switchActiveElement(null);
+		const target = evt.target as HTMLElement;
+		if(target === document.body) {
+			if (evt.key === 'Escape') {
+				this.#switchActiveElement(null);
+			}
 		}
 	};
 
@@ -165,18 +170,12 @@ class EventListPresenter {
 		document.removeEventListener('keydown', this.#escapeHandler);
 	};
 
-	#deleteEvent = (id: Point['id']) => {
+	#deleteEvent = () => {
 		this.#switchActiveElement(null);
-		const wrapper = this.#listItems.find((listItem) => listItem.content.id === id)!;
-		const element = wrapper.content;
-		element.remove();
-		wrapper.container.removeElement();
-		this.#listItems = this.#listItems.filter((listItem) => listItem.content.id !== id);
-		this.#handlers.deletePoint(id);
-		this.#points = this.#points.filter((point) => point.id !== id);
 	};
 
 	updateTripList = (newPoints: Point[])=> {
+		this.#switchActiveElement(null);
 		if (this.#listItems.length){
 			this.#listItems.forEach((listItem) => {
 				listItem.container.removeElement();
@@ -187,8 +186,17 @@ class EventListPresenter {
 		this.#points = newPoints;
 		this.#points.map((point) => this.#addEvent(point));
 	};
+
+	#pointsModelChangeHandler = (updateType: unknown, update: Point) => {
+		switch (updateType) {
+			case 'PATCH': {
+				const pointItem = this.#listItems.find((item) => item.content.id === update.id as Point['id'])!;
+				pointItem.content.remove();
+				this.#addEvent(update as Point, pointItem);
+			}
+		}
+	};
 }
 
 export {EventListPresenter};
 export type {EventKinds, SwitchEventsHandler};
-

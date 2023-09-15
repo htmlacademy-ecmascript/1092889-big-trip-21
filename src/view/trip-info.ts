@@ -21,7 +21,7 @@ class TripInfoView extends AbstractStatefulView<HTMLElement>{
 	}
 
 	get template(): string {
-		return getTripInfoTemplate(this.#getDestinations(), this.#price) ;
+		return getTripInfoTemplate(this.#getDestinations(), this.#price, this.#dates) ;
 	}
 
 	#getDestinations = (): string => {

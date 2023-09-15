@@ -7,12 +7,17 @@ import OffersModel from '../model/offers';
 import { remove, render } from '../framework/render';
 import AbstractPresenter from './abstract';
 
+
+interface EventAddPresenterHandlers {
+	cancelEventAdd: (param: null) => void
+}
+
 interface EventAddPresenterProps {
 	container: EventListItemView,
 	pointsModel: PointsModel,
 	destinationsModel: DestinationsModel,
 	offersModel: OffersModel,
-	handlers: ()=>void;
+	handlers: EventAddPresenterHandlers
 }
 
 export default class EventAddPresenter extends AbstractPresenter{
@@ -23,7 +28,7 @@ export default class EventAddPresenter extends AbstractPresenter{
 	#pointsModel: PointsModel;
 	#destinationsModel: DestinationsModel;
 	#offersModel: OffersModel;
-	#handlers: ()=>void;
+	handlers: EventAddPresenterHandlers;
 
 	constructor(props: EventAddPresenterProps) {
 		super();
@@ -33,7 +38,7 @@ export default class EventAddPresenter extends AbstractPresenter{
 		this.#destinationsModel = props.destinationsModel;
 		this.#offersModel = props.offersModel;
 		this.#id = this.#state.id;
-		this.#handlers = props.handlers;
+		this.handlers = props.handlers;
 
 		this.#target = this.#getTarget();
 		this.render();
@@ -50,24 +55,36 @@ export default class EventAddPresenter extends AbstractPresenter{
 		type: 'Flight'
 	});
 
-	getOffersByType = (eventType: EventType) => this.#offersModel.getByType(eventType)!.offers;
+	#getOffersByType = (eventType: EventType) => this.#offersModel.getByType(eventType)!.offers;
 
-	getDestinationByName = (destinationName: Destination['name']) => this.#destinationsModel.getByName(destinationName);
+	#getDestinationByName = (destinationName: Destination['name']) => this.#destinationsModel.getByName(destinationName);
 
+	#getOffersById = (...id:string[]) => id.map((offerId) => this.#offersModel.getById(offerId));
+
+	#getTarget = () => new EventAddView({
+		state: this.#state,
+		eventTypes: this.#offersModel.eventTypes,
+		destinationsNames: this.#destinationsModel.destinationsNames,
+	},
+	{
+		getOffersByType: this.#getOffersByType,
+		getOffersById: this.#getOffersById,
+		getDestinationByName: this.#getDestinationByName,
+		cancelHandler: this.#cancelEventAdd,
+		createPoint: this.#createPoint
+	});
+
+	#createPoint = (state: Point) => {
+		this.#pointsModel.createPoint(state);
+	};
+
+	#cancelEventAdd = () => {
+		this.handlers.cancelEventAdd(null);
+	};
 
 	get id() {
 		return this.#id;
 	}
-
-	#getTarget = () => new EventAddView({
-		eventTypes: this.#offersModel.eventTypes,
-		destinationsNames: this.#destinationsModel.destinationsNames,
-		state: this.#state,
-		handlers: {
-			getOffersByType: this.getOffersByType,
-			getDestinationByName: this.getDestinationByName,
-			handler: this.#handlers}
-	});
 
 	render() {
 		render(this.#target, this.#container.element);
@@ -78,3 +95,4 @@ export default class EventAddPresenter extends AbstractPresenter{
 	}
 
 }
+

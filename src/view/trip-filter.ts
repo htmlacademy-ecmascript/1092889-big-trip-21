@@ -18,12 +18,7 @@ class TripFilterView extends AbstractStatefulView<HTMLFormElement>{
 
 	#filterHandler = (evt: Event) => {
 		const target = evt.target as HTMLInputElement;
-		const previousTargetIndex = this.#filterOptions.findIndex((element) => element.disabled);
-		if(this.#filterOptions[previousTargetIndex] === target) {
-			return;
-		}
 		const currentTargetIndex = this.#filterOptions.findIndex((element) => element.value === target.value);
-		this.#toggleFilterOption(this.#filterOptions[previousTargetIndex]);
 		this.#toggleFilterOption(this.#filterOptions[currentTargetIndex]);
 
 		this.#filterOptions[currentTargetIndex] = target;
@@ -35,11 +30,9 @@ class TripFilterView extends AbstractStatefulView<HTMLFormElement>{
 			return;
 		}
 		if (element.checked) {
-			element.disabled = true;
 			element.checked = true;
 			return;
 		}
-		element.disabled = false;
 		element.checked = false;
 	};
 

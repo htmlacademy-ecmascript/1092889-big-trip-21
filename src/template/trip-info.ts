@@ -1,8 +1,8 @@
-const getTripInfoTemplate = (destinations: string, price: number) => `<section class="trip-main__trip-info  trip-info">
+const getTripInfoTemplate = (destinations: string, price: number, dates: string[]) => `<section class="trip-main__trip-info  trip-info">
 <div class="trip-info__main">
 <h1 class="trip-info__title">${destinations}</h1>
 
-<p class="trip-info__dates">Mar 18&nbsp;&mdash;&nbsp;20</p>
+<p class="trip-info__dates">${dates[0]}&nbsp;&mdash;&nbsp;${dates[1]}</p>
 </div>
 
 <p class="trip-info__cost">

@@ -11,7 +11,9 @@ interface EventPresenterProps {
 	point: Point,
 	offers: Offer[],
 	destination: Destination,
-	handlers: SwitchEventsHandler
+	handlers: {
+		switchEvent: SwitchEventsHandler,
+		updateFavourite: (id: Point) => void}
 }
 
 export default class EventPresenter extends AbstractPresenter{
@@ -21,7 +23,10 @@ export default class EventPresenter extends AbstractPresenter{
 	#offers: Offer[];
 	#destination: Destination;
 	#id: Point['id'];
-	#handlers: SwitchEventsHandler;
+	#handlers: {
+		switchEvent: SwitchEventsHandler,
+		updateFavourite: (id: Point) => void
+	};
 
 	constructor(props: EventPresenterProps) {
 		super();
@@ -44,11 +49,19 @@ export default class EventPresenter extends AbstractPresenter{
 		return this.#container;
 	}
 
+	#updateFavourite = () => {
+		this.#handlers.updateFavourite(this.#state);
+	};
+
+
 	#getTarget = () => new EventThumbnailView({
 		state: this.#state,
 		offers: this.#offers,
 		destination: this.#destination,
-		handlers: this.#handlers
+		handlers: {
+			switchEvent: this.#handlers.switchEvent,
+			updateFavourite: this.#updateFavourite
+		}
 	});
 
 	render() {

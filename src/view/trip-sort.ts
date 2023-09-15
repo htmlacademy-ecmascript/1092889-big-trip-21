@@ -19,12 +19,8 @@ class TripSortView extends AbstractStatefulView<HTMLFormElement>{
 
 	#sortHandler = (evt: Event) => {
 		const target = evt.target as HTMLInputElement;
-		const previousTargetIndex = this.#sortOptions.findIndex((element) => element.disabled);
-		if(this.#sortOptions[previousTargetIndex] === target) {
-			return;
-		}
+
 		const currentTargetIndex = this.#sortOptions.findIndex((element) => element.value === target.value);
-		this.#toggleSortOption(this.#sortOptions[previousTargetIndex]);
 		this.#toggleSortOption(this.#sortOptions[currentTargetIndex]);
 
 		this.#sortOptions[currentTargetIndex] = target;
@@ -36,11 +32,9 @@ class TripSortView extends AbstractStatefulView<HTMLFormElement>{
 			return;
 		}
 		if (element.checked) {
-			element.disabled = true;
 			element.checked = true;
 			return;
 		}
-		element.disabled = false;
 		element.checked = false;
 	};
 
