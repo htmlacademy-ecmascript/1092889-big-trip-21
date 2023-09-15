@@ -26,7 +26,7 @@ export default class TripFiltersPresenter {
 	#filterPoints = (value: FILTER_TYPE) => {
 		const currentTime = new Date();
 
-		const points = this.#getCurrentPoints();
+		const points = [...this.#getCurrentPoints()].sort((a,b) => a.dateFrom.getTime() - b.dateFrom.getTime());
 		const presentIndex = points.findIndex((point) => point.dateTo.getTime() >= currentTime.getTime() && point.dateFrom.getTime() <= currentTime.getTime());
 		const filteredPoints = new Map([
 			['everything', points],
