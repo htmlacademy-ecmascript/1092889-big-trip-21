@@ -3,6 +3,7 @@ import OffersModel from '../model/offers';
 import PointsModel from '../model/points';
 import {TripInfoView} from '../view/trip-info';
 import {Destination} from '../contracts/contracts';
+import dayjs from 'dayjs';
 
 interface TripInfoPresenterProps {
 	container: HTMLElement,
@@ -30,7 +31,7 @@ export default class TripInfoPresenter {
 	#getTarget = () => new TripInfoView({
 		destinations: this.#destinations.map((destination) => destination.name),
 		price: this.#getPrice(),
-		dates:[]
+		dates:this.#getDates()
 
 	});
 
@@ -40,6 +41,13 @@ export default class TripInfoPresenter {
 		const offers = points.flatMap((point) => point.offers).map((offer) => this.#offersModel.getById(offer));
 		const offersSum = offers.reduce((acc, offer)=> acc + offer.price, 0);
 		return(offersSum + pointsSum);
+	};
+
+	#getDates = () => {
+		const points = this.#pointsModel.points!;
+		const sortedPoints = [...points].sort((a,b) => a.dateFrom.getTime() - b.dateFrom.getTime());
+
+		return [dayjs(sortedPoints[0].dateFrom).format('MMM D').toString(),dayjs(sortedPoints.at(-1)!.dateTo).format('MMM D')];
 	};
 
 	render = () => {

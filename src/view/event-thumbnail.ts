@@ -13,7 +13,9 @@ interface EventThumbnailViewProps {
 	state: Point,
 	offers: Offer[],
 	destination: Destination,
-	handlers: SwitchEventsHandler;
+	handlers: {
+		switchEvent: SwitchEventsHandler,
+		updateFavourite: () => void};
 }
 
 class EventThumbnailView extends AbstractView<HTMLDivElement>{
@@ -21,7 +23,12 @@ class EventThumbnailView extends AbstractView<HTMLDivElement>{
 	#offers: Offer[];
 	#destination: Destination;
 	#editButton: HTMLButtonElement;
-	#handlers: SwitchEventsHandler;
+	#favouriteButton: HTMLButtonElement;
+	#handlers: {
+		switchEvent: SwitchEventsHandler,
+		updateFavourite: () => void
+	};
+
 	constructor(props: EventThumbnailViewProps) {
 		super();
 		this.#state = props.state;
@@ -30,19 +37,26 @@ class EventThumbnailView extends AbstractView<HTMLDivElement>{
 		this.#handlers = props.handlers;
 
 		this.#editButton = this.element.querySelector('.event__rollup-btn')!;
+		this.#favouriteButton = this.element.querySelector('.event__favorite-btn')!;
 		this.initListeners();
 	}
 
 	initListeners = () => {
-		this.#editButton.addEventListener('click', this.toggleEventListener);
+		this.#editButton.addEventListener('click', this.#toggleEventHandler);
+		this.#favouriteButton.addEventListener('click', this.#toggleFavouriteHandler);
 	};
 
 	removeListeners = () => {
-		this.#editButton.removeEventListener('click', this.toggleEventListener);
+		this.#editButton.removeEventListener('click', this.#toggleEventHandler);
+		this.#favouriteButton.removeEventListener('click', this.#toggleFavouriteHandler);
 	};
 
-	toggleEventListener = () => {
-		this.#handlers(this.#state.id, Default.SWITCH_KIND);
+	#toggleEventHandler = () => {
+		this.#handlers.switchEvent(this.#state.id, Default.SWITCH_KIND);
+	};
+
+	#toggleFavouriteHandler = () => {
+		this.#handlers.updateFavourite();
 	};
 
 	calculateDuration = ({dateFrom, dateTo}: Point) => getRelativeTime(dayjs(dateFrom), dayjs(dateTo));

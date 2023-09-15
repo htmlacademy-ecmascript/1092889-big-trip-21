@@ -1,4 +1,4 @@
-import { Destination, Offer, Point } from '../contracts/contracts';
+import { Point } from '../contracts/contracts';
 import DestinationsModel from '../model/destinations';
 import OffersModel from '../model/offers';
 import PointsModel from '../model/points';
@@ -6,7 +6,6 @@ import { EventListPresenter } from './event-list';
 import TripFiltersPresenter from './trip-filters';
 import TripInfoPresenter from './trip-info';
 import TripSortPresenter from './trip-sort';
-import {FILTER_TYPE, SORT_TYPE} from '../contracts/constants';
 interface ControllersPresenterProps {
 	pointsModel: PointsModel,
 	destinationsModel: DestinationsModel,
@@ -15,10 +14,6 @@ interface ControllersPresenterProps {
 
 interface ControllersPresenterState {
 	currentPoints: Point[],
-	currentDestinations: Destination[],
-	currentOffers: Offer[],
-	currentFilter: FILTER_TYPE,
-	currentSort: SORT_TYPE
 }
 
 interface PageContainers {
@@ -30,10 +25,6 @@ interface PageContainers {
 export default class ControllersPresenter {
 	#state: ControllersPresenterState = {
 		currentPoints:[],
-		currentDestinations:[],
-		currentOffers: [],
-		currentFilter: 'everything',
-		currentSort: 'sort-day'
 	};
 
 	#pointsModel: PointsModel | null = null;
@@ -44,6 +35,7 @@ export default class ControllersPresenter {
 	#info: TripInfoPresenter | null = null;
 	#eventList: EventListPresenter | null = null;
 	#containers: PageContainers | null = null;
+	#addButton: HTMLButtonElement | null = null;
 
 	constructor(props: ControllersPresenterProps) {
 		this.#pointsModel = props.pointsModel;
@@ -54,63 +46,53 @@ export default class ControllersPresenter {
 			main: document.querySelector('.trip-events') as HTMLElement,
 			header: document.querySelector('.trip-main') as HTMLDivElement
 		};
+		this.#addButton = document.querySelector('.trip-main__event-add-btn')!;
+		this.#pointsModel.addObserver(this.#pointsModelChangeHandler);
 		this.initialRender();
 	}
+
+
+	#pointsModelChangeHandler = (updateType: unknown, update: unknown) => {
+		this.#setState({currentPoints: update as Point[]});
+		switch (updateType) {
+			case 'MAJOR' : {
+				this.refreshInfo();
+				this.#setState({currentPoints: this.#filter!.getFilteredPoints('everything')});
+				this.#setState({currentPoints: this.#sort!.getSortedPoints('sort-day')});
+				this.refreshEventList(this.#state.currentPoints);
+				break;
+			}
+		}
+	};
 
 	#setState = (update: ControllersPresenterState | Partial<ControllersPresenterState>) => {
 		this.#state = structuredClone({...this.#state, ...update});
 	};
 
-	#updateState = () => {};
-
-	updateSort = (value: SORT_TYPE) => {
-		switch(value) {
-			case 'sort-price': break;
-			case 'sort-time': break;
-			default: break;
-		}
-		this.#setState({currentSort: value});
-		this.refreshEventList();
-	};
-
-	updateFilter = (value: FILTER_TYPE) => {
-		switch (value) {
-			case 'present': break;
-			case 'future': break;
-			case 'past': break;
-			default: break;
-		}
-		this.#setState({currentFilter: value});
-		this.refreshEventList();
-	};
-
+	#getDestinationsFromPoints = () => this.#state.currentPoints.map((point) => this.#destinationsModel.getById(point.destination));
 	initialRender = () => {
 		const points = this.#pointsModel!.points!;
-		const destinations = points.map((point) => this.#destinationsModel.getById(point.destination));
-		const offers = points.flatMap((point) => point.offers.map((offer) => this.#offersModel.getById(offer)));
 
 		this.#setState({
 			currentPoints: points,
-			currentDestinations: destinations,
-			currentOffers: offers,
-			currentFilter: 'everything',
-			currentSort: 'sort-day'
 		});
 		this.#info = new TripInfoPresenter({
 			container: this.#containers!.header,
 			pointsModel:this.#pointsModel!,
-			destinations: this.#state.currentDestinations,
+			destinations: this.#getDestinationsFromPoints(),
 			offersModel: this.#offersModel,
 		});
 
 		this.#filter = new TripFiltersPresenter({
 			container: this.#containers!.filter,
-			updateFilter: this.updateFilter
+			getCurrentPoints: () => this.#pointsModel!.points!,
+			filterHandler: this.filterUpdateHandler
 		});
 
 		this.#sort = new TripSortPresenter({
 			container: this.#containers!.main,
-			updateSort: this.updateSort
+			getCurrentPoints: this.getCurrentPoints,
+			sortHandler: this.sortUpdateHandler
 		});
 
 		this.#eventList = new EventListPresenter({
@@ -121,48 +103,31 @@ export default class ControllersPresenter {
 			offersModel: this.#offersModel,
 			handlers: {deletePoint: this.#deletePoint}
 		});
+		this.#addButton!.addEventListener('click', this.addButtonHandler);
 	};
 
-	refreshEventList = () => {
-		this.filterPoints(this.#state.currentFilter);
-		this.sortPoints(this.#state.currentSort);
+	getCurrentPoints = () => this.#state.currentPoints;
 
-		this.#eventList!.updateTripList(this.#state.currentPoints);
+	addButtonHandler = () => {
+		this.#setState({currentPoints: this.#filter!.getFilteredPoints('everything')});
+		this.#setState({currentPoints: this.#sort!.getSortedPoints('sort-day')});
+		this.refreshEventList(this.#state.currentPoints);
+		this.#eventList!.newEvent();
 	};
 
-	filterPoints = (value: FILTER_TYPE) => {
-		const currentTime = new Date();
-		const filterDefault = () => this.#pointsModel!.points!;
-		const filterPresent = () => this.#pointsModel!.points!.filter((point) => point.dateTo.getTime() >= currentTime.getTime() && point.dateFrom.getTime() <= currentTime.getTime());
-		const filterFuture = () => this.#pointsModel!.points!.filter((point) => point.dateFrom.getTime() > currentTime.getTime());
-		const filterPast = () => this.#pointsModel!.points!.filter((point) => point.dateFrom.getTime() < currentTime.getTime());
-
-		const filters: Map<FILTER_TYPE,() => Point[]> = new Map([
-			['everything', filterDefault],
-			['present', filterPresent],
-			['future', filterFuture],
-			['past', filterPast]
-		]);
-
-		this.#setState({
-			currentPoints: filters.get(value)!()
-		});
+	filterUpdateHandler = () => {
+		this.#setState({currentPoints: this.#filter!.getFilteredPoints()});
+		this.#setState({currentPoints: this.#sort!.getSortedPoints('sort-day')});
+		this.refreshEventList(this.#state.currentPoints);
 	};
 
-	sortPoints = (value: SORT_TYPE) => {
-		const sortByPrice = (priceOne: Point, priceTwo: Point) => priceOne.basePrice - priceTwo.basePrice;
-		const sortByTime = (timeOne: Point, timeTwo: Point) => (timeOne.dateTo.getTime() - timeOne.dateFrom.getTime()) - (timeTwo.dateTo.getTime() - timeTwo.dateFrom.getTime());
-		const sortByDate = (dayOne: Point, dayTwo: Point) => dayOne.dateFrom.getTime() - dayTwo.dateFrom.getTime();
+	sortUpdateHandler = () => {
+		this.#setState({currentPoints: this.#sort!.getSortedPoints()});
+		this.refreshEventList(this.#state.currentPoints);
+	};
 
-		const sorts:Map<SORT_TYPE, (a: Point,b: Point) => number> = new Map ([
-			['sort-price', sortByPrice],
-			['sort-day', sortByDate],
-			['sort-time', sortByTime]
-		]);
-
-		this.#setState({
-			currentPoints: this.#state.currentPoints.sort((a, b) => sorts.get(value)!(a, b))
-		});
+	refreshEventList = (points: Point[]) => {
+		this.#eventList!.updateTripList(points);
 	};
 
 	refreshInfo = () => {
@@ -170,7 +135,7 @@ export default class ControllersPresenter {
 		this.#info = this.#info = new TripInfoPresenter({
 			container: this.#containers!.header,
 			pointsModel:this.#pointsModel!,
-			destinations: this.#state.currentDestinations,
+			destinations: this.#getDestinationsFromPoints(),
 			offersModel: this.#offersModel,
 		});
 	};
@@ -178,7 +143,6 @@ export default class ControllersPresenter {
 	#deletePoint = (pointId: Point['id']) => {
 		const selectedPoint = this.#state.currentPoints.find((point) => point.id === pointId);
 		this.#setState({
-			currentDestinations: this.#state.currentDestinations.filter((destination) => destination.id !== selectedPoint!.destination),
 			currentPoints: this.#state.currentPoints.filter((point) => point.id !== selectedPoint!.id)
 		});
 		this.refreshInfo();

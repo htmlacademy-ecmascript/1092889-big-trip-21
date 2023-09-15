@@ -68,7 +68,7 @@ export default class EventEditPresenter extends AbstractPresenter{
 	});
 
 	#updatePoint = (state: Point) => {
-		this.#pointsModel.update(state);
+		this.#pointsModel.updatePoint(state);
 	};
 
 	#deletePoint = (id: Point['id']) => {
