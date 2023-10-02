@@ -1,12 +1,14 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import {getTripSortTemplate} from '../template/trip-sort';
-import {SORT_TYPE} from '../contracts/constants';
+import {SortType} from '../contracts/constants';
 
 class TripSortView extends AbstractStatefulView<HTMLFormElement>{
 	#sortOptions: HTMLInputElement[] = [];
-	#updateSort: (value: SORT_TYPE) => void;
-	constructor(updateSort: (value: SORT_TYPE) => void) {
+	#updateSort: (value: SortType) => void;
+	#currentSort: SortType;
+	constructor(currentSort: SortType,updateSort: (value: SortType) => void) {
 		super();
+		this.#currentSort = currentSort;
 		this.#updateSort = updateSort;
 		this.initHandlers();
 	}
@@ -21,25 +23,13 @@ class TripSortView extends AbstractStatefulView<HTMLFormElement>{
 		const target = evt.target as HTMLInputElement;
 
 		const currentTargetIndex = this.#sortOptions.findIndex((element) => element.value === target.value);
-		this.#toggleSortOption(this.#sortOptions[currentTargetIndex]);
 
 		this.#sortOptions[currentTargetIndex] = target;
-		this.#updateSort(target.value as SORT_TYPE);
-	};
-
-	#toggleSortOption = (element: HTMLInputElement) => {
-		if (!element){
-			return;
-		}
-		if (element.checked) {
-			element.checked = true;
-			return;
-		}
-		element.checked = false;
+		this.#updateSort(target.value as SortType);
 	};
 
 	get template(): string {
-		return getTripSortTemplate() ;
+		return getTripSortTemplate(this.#currentSort) ;
 	}
 
 	remove() {

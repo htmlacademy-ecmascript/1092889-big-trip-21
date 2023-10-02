@@ -1,6 +1,8 @@
-const getTripSortTemplate = () => `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
+import {SortType} from '../contracts/constants';
+
+const getTripSortTemplate = (currentSort: SortType) => `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
                 <div class="trip-sort__item  trip-sort__item--day">
-                  <input id="sort-day" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-day" checked>
+                  <input id="sort-day" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-day" ${currentSort === SortType.DAY ? 'checked' : ''}>
                   <label class="trip-sort__btn" for="sort-day">Day</label>
                 </div>
 
@@ -10,12 +12,12 @@ const getTripSortTemplate = () => `<form class="trip-events__trip-sort  trip-sor
                 </div>
 
                 <div class="trip-sort__item  trip-sort__item--time">
-                  <input id="sort-time" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-time">
+                  <input id="sort-time" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-time" ${currentSort === SortType.TIME ? 'checked' : ''}>
                   <label class="trip-sort__btn" for="sort-time">Time</label>
                 </div>
 
                 <div class="trip-sort__item  trip-sort__item--price">
-                  <input id="sort-price" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-price">
+                  <input id="sort-price" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-price" ${currentSort === SortType.PRICE ? 'checked' : ''}>
                   <label class="trip-sort__btn" for="sort-price">Price</label>
                 </div>
 

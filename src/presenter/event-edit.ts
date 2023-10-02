@@ -10,12 +10,12 @@ import AbstractPresenter from './abstract';
 
 interface EditEventPresenterHandlers {
 	switchEvent: SwitchEventsHandler,
-	deleteEvent: (id: Point['id']) => void
+	cancelEventAdd: (param: null) => void
 }
 
 interface EventEditPresenterProps {
 	container: EventListItemView,
-	state: Point
+	state: Point | null,
 	pointsModel: PointsModel,
 	destinationsModel: DestinationsModel,
 	offersModel: OffersModel,
@@ -24,9 +24,9 @@ interface EventEditPresenterProps {
 
 export default class EventEditPresenter extends AbstractPresenter{
 	#container: EventListItemView;
-	#state: Point;
-	#target: EventEditView;
-	#id: Point['id'];
+	#state: Point ;
+	target: EventEditView;
+	#id: Point['id'] | '';
 	#pointsModel: PointsModel;
 	#destinationsModel: DestinationsModel;
 	#offersModel: OffersModel;
@@ -35,14 +35,14 @@ export default class EventEditPresenter extends AbstractPresenter{
 	constructor(props: EventEditPresenterProps) {
 		super();
 		this.#container = props.container;
-		this.#state = props.state;
 		this.#pointsModel = props.pointsModel;
+		this.#state = (props.state) ? props.state : {...this.#pointsModel.getBlankPoint(), id: ''};
 		this.#destinationsModel = props.destinationsModel;
 		this.#offersModel = props.offersModel;
-		this.#id = this.#state.id;
+		this.#id = (props.state) ? props.state.id : '';
 		this.handlers = props.handlers;
 
-		this.#target = this.#getTarget();
+		this.target = this.#getTarget();
 		this.render();
 	}
 
@@ -64,7 +64,9 @@ export default class EventEditPresenter extends AbstractPresenter{
 		getDestinationByName: this.#getDestinationByName,
 		switchHandler: this.handlers.switchEvent,
 		deletePoint: this.#deletePoint,
-		updatePoint: this.#updatePoint
+		updatePoint: this.#updatePoint,
+		cancelHandler: this.#cancelEventAdd,
+		createPoint: this.#createPoint
 	});
 
 	#updatePoint = (state: Point) => {
@@ -73,7 +75,14 @@ export default class EventEditPresenter extends AbstractPresenter{
 
 	#deletePoint = (id: Point['id']) => {
 		this.#pointsModel.delete(id);
-		this.handlers.deleteEvent(id);
+	};
+
+	#createPoint = (state: Point) => {
+		this.#pointsModel.createPoint(state);
+	};
+
+	#cancelEventAdd = () => {
+		this.handlers.cancelEventAdd(null);
 	};
 
 	get id() {
@@ -81,11 +90,11 @@ export default class EventEditPresenter extends AbstractPresenter{
 	}
 
 	render() {
-		render(this.#target, this.#container.element);
+		render(this.target, this.#container.element);
 	}
 
 	remove() {
-		remove(this.#target);
+		remove(this.target);
 	}
 
 }

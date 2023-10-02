@@ -1,10 +1,9 @@
 import {EventListItemView} from '../view/event-list-item';
 import {EventListView} from '../view/event-list';
-import {render} from '../framework/render';
+import {remove, render} from '../framework/render';
 import PointsModel from '../model/points';
 import OffersModel from '../model/offers';
 import DestinationsModel from '../model/destinations';
-import EventAddPresenter from './event-add';
 import {Point} from '../contracts/contracts';
 import EventEditPresenter from './event-edit';
 import EventPresenter from './event';
@@ -17,9 +16,6 @@ interface EventListPresenterProps {
 	pointsModel: PointsModel,
 	offersModel: OffersModel,
 	destinationsModel: DestinationsModel,
-	handlers: {
-		deletePoint :(id: Point['id']) => void;
-	}
 }
 
 
@@ -41,10 +37,6 @@ class EventListPresenter {
 	#offersModel: OffersModel;
 	#destinationsModel: DestinationsModel;
 
-	#handlers: {
-		deletePoint :(id: Point['id']) => void;
-	};
-
 	#activeElement: AbstractPresenter | null = null;
 	constructor(props: EventListPresenterProps) {
 		this.#points = props.points;
@@ -55,89 +47,64 @@ class EventListPresenter {
 
 		render(this.#eventList, this.#container);
 		this.updateTripList(this.#points);
-		this.#handlers = props.handlers;
 		this.#pointsModel.addObserver(this.#pointsModelChangeHandler as (updateType: unknown, update: unknown) => void);
 	}
 
-	#addEvent = (point: Point, wrapper: EventListItem | null = null) => {
-		const destination = this.#destinationsModel.getById(point.destination);
-		const offers = point.offers.map(this.#offersModel.getById);
-
-		if (!wrapper){
-			const container = new EventListItemView();
-			const element = new EventPresenter({
-				container: container,
-				point: point,
-				destination: destination,
-				offers: offers,
-				handlers: {
-					switchEvent: this.#switchEventsHandler,
-					updateFavourite: this.#pointsModel.updateFavorite
-				}
-			});
-			this.#listItems.push({container: container, content: element});
-			render(container, this.#eventList.element);
-		} else {
-			const element = new EventPresenter({
-				container: wrapper.container,
-				point: point,
-				destination: destination,
-				offers: offers,
-				handlers: {
-					switchEvent: this.#switchEventsHandler,
-					updateFavourite: this.#pointsModel.updateFavorite
-				}
-			});
-			wrapper.content = element;
-		}
+	#addEvent = (point: Point) => {
+		const container = new EventListItemView();
+		const element = this.createEvent(point,container);
+		this.#listItems.push({container: container, content: element});
+		render(container, this.#eventList.element);
 	};
+
+	createEvent = (point: Point, container: EventListItemView) => new EventPresenter({
+		container: container,
+		point: point,
+		destination: this.#destinationsModel.getById(point.destination),
+		offers: point.offers.map(this.#offersModel.getById),
+		handlers: {
+			switchEvent: this.#switchEventsHandler,
+			updateFavourite: this.#pointsModel.updateFavorite
+		}
+	});
 
 	newEvent = () => {
 		const container = new EventListItemView();
-		const element = new EventAddPresenter({
-			container: container,
-			pointsModel: this.#pointsModel,
-			destinationsModel: this.#destinationsModel,
-			offersModel: this.#offersModel,
-			handlers: {
-				cancelEventAdd: this.#switchActiveElement
-			}
-		});
+		const element = this.createEditEvent(container);
 		this.#listItems.push({container: container, content: element});
-		this.#switchActiveElement(element);
 		render(container, this.#eventList.element, 'afterbegin');
+		this.#activeElement = element;
 		this.#addEscapeHandler();
 	};
 
-	#editEvent = (id: Point['id'], container: EventListItem) => {
-		const element = new EventEditPresenter({
-			container: container.container,
-			state: this.#pointsModel.getById(id),
-			pointsModel: this.#pointsModel,
-			destinationsModel: this.#destinationsModel,
-			offersModel: this.#offersModel,
-			handlers: {
-				switchEvent: this.#switchEventsHandler,
-				deleteEvent: this.#deleteEvent
-			}
-		});
-		container.content = element;
-		this.#switchActiveElement(element);
-		this.#addEscapeHandler();
-	};
+	createEditEvent = (container: EventListItemView,id?: Point['id']) => new EventEditPresenter({
+		container: container,
+		state: (id) ? this.#pointsModel.getById(id) : null,
+		pointsModel: this.#pointsModel,
+		destinationsModel: this.#destinationsModel,
+		offersModel: this.#offersModel,
+		handlers: {
+			switchEvent: this.#switchEventsHandler,
+			cancelEventAdd: this.#switchActiveElement
+		}
+	});
 
 	#switchEventsHandler = (id: Point['id'], kind: EventKinds) => {
 		const wrapper = this.#listItems.find((listItem) => listItem.content.id === id)!;
 		const element = wrapper.content;
 		element.remove();
 		if (kind === 'Edit') {
-			this.#editEvent(id, wrapper);
+			const editEvent = this.createEditEvent(wrapper.container, id);
+			wrapper.content = editEvent;
+			this.#activeElement = editEvent;
+			this.#addEscapeHandler();
 			return;
 		}
 		this.#removeEscapeHandler();
 		this.#activeElement = null;
 		const point = this.#pointsModel.getById(id);
-		this.#addEvent(point, wrapper);
+		const event = this.createEvent(point, wrapper.container);
+		wrapper.content = event;
 	};
 
 	#switchActiveElement = (element: AbstractPresenter | null) => {
@@ -153,11 +120,9 @@ class EventListPresenter {
 	};
 
 	#escapeHandler = (evt: KeyboardEvent) => {
-		const target = evt.target as HTMLElement;
-		if(target === document.body) {
-			if (evt.key === 'Escape') {
-				this.#switchActiveElement(null);
-			}
+		if (evt.key === 'Escape') {
+			this.#removeEscapeHandler();
+			this.#switchActiveElement(null);
 		}
 	};
 
@@ -170,21 +135,22 @@ class EventListPresenter {
 		document.removeEventListener('keydown', this.#escapeHandler);
 	};
 
-	#deleteEvent = () => {
-		this.#switchActiveElement(null);
+	updateTripList = (newPoints: Point[])=> {
+		this.clearTripList();
+		this.#points = newPoints;
+		if (this.#points.length === 0) {
+			return;
+		}
+		this.#points.map((point) => this.#addEvent(point));
 	};
 
-	updateTripList = (newPoints: Point[])=> {
+	clearTripList = () => {
 		this.#switchActiveElement(null);
-		if (this.#listItems.length){
-			this.#listItems.forEach((listItem) => {
-				listItem.container.removeElement();
-				listItem.content.remove();
-			});
-			this.#listItems = [];
-		}
-		this.#points = newPoints;
-		this.#points.map((point) => this.#addEvent(point));
+		this.#listItems.forEach((listItem) => {
+			remove(listItem.container);
+			listItem.content.remove();
+		});
+		this.#listItems = [];
 	};
 
 	#pointsModelChangeHandler = (updateType: unknown, update: Point) => {
@@ -192,7 +158,8 @@ class EventListPresenter {
 			case 'PATCH': {
 				const pointItem = this.#listItems.find((item) => item.content.id === update.id as Point['id'])!;
 				pointItem.content.remove();
-				this.#addEvent(update as Point, pointItem);
+				const event = this.createEvent(update as Point, pointItem.container);
+				pointItem.content = event;
 			}
 		}
 	};

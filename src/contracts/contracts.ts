@@ -1,4 +1,4 @@
-type EventType = 'Flight'|'Taxi'|'Bus'|'Train'|'Ship'|'Drive'|'Check-in'|'Sightseeing'|'Restaurant'
+type EventType = 'flight'|'taxi'|'bus'|'train'|'ship'|'drive'|'check-in'|'sightseeing'|'restaurant'
 
 
 type Offer = {
@@ -40,7 +40,7 @@ type Point = {
 	dateFrom: Date,
 	dateTo: Date,
 	destination: Destination['id'],
-	isFavourite: boolean,
+	isFavorite: boolean,
 	offers: Offer['id'][],
 	type:EventType
 }

@@ -1,12 +1,12 @@
 import {EventEditViewProps, StateFullOffers} from '../view/event-edit';
-import {Destination, EventType} from '../contracts/contracts';
+import {Destination, EventType, Point} from '../contracts/contracts';
 import dayjs from 'dayjs';
 
 
-const getEventTypesSelectTemplate = (eventTypes: EventType[]) => (
+const getEventTypesSelectTemplate = (eventTypes: EventType[], currentType: Point['type']) => (
 	eventTypes.map((eventType) => (
 		`<div class="event__type-item">
-			<input id="event-type-${eventType.toLowerCase()}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${eventType}">
+			<input id="event-type-${eventType.toLowerCase()}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${eventType}" ${(eventType === currentType) ? 'checked' : ''}>
 			<label class="event__type-label  event__type-label--${eventType.toLowerCase()}" for="event-type-${eventType.toLowerCase()}-1">${eventType}</label>
 		</div>`)).join(''));
 
@@ -51,7 +51,7 @@ const getEventEditTemplate = ({state, eventTypes, destinationsNames, destination
                         <div class="event__type-list">
                           <fieldset class="event__type-group">
                             <legend class="visually-hidden">Event type</legend>
-							${getEventTypesSelectTemplate(eventTypes)}
+							${getEventTypesSelectTemplate(eventTypes, state.type)}
                           </fieldset>
                         </div>
                       </div>
@@ -60,7 +60,7 @@ const getEventEditTemplate = ({state, eventTypes, destinationsNames, destination
                         <label class="event__label  event__type-output" for="event-destination-1">
                           ${state.type}
                         </label>
-                        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1">
+                        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${(destination !== '') ? destination.name : destination}" list="destination-list-1">
                         <datalist id="destination-list-1">
                         ${destinationsNames.map((destinationName) => (`<option value="${destinationName}"></option>`)).join('')}
                         </datalist>
@@ -83,14 +83,14 @@ const getEventEditTemplate = ({state, eventTypes, destinationsNames, destination
                       </div>
 
                       <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-                      <button class="event__reset-btn" type="reset">Delete</button>
+                      <button class="event__reset-btn" type="reset">${(state.id) ? 'Delete' : 'Cancel'}</button>
                       <button class="event__rollup-btn" type="button">
                         <span class="visually-hidden">Open event</span>
                       </button>
                     </header>
                     <section class="event__details">
 						${(offers.length >= 1) ? getOffersTemplate(offers) : ''}
-						${(destination.description.length) ? getDestinationTemplate(destination) : ''}
+						${(destination && destination.description.length) ? getDestinationTemplate(destination) : ''}
                     </section>
                   </form>`;
 

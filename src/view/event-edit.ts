@@ -13,12 +13,14 @@ interface EventEditViewHandlers {
 	switchHandler: SwitchEventsHandler,
 	deletePoint: (id: Point['id']) => void,
 	updatePoint:(state: Point) => void,
+	cancelHandler: () => void,
+	createPoint:(state: Point) => void,
 }
 interface EventEditViewProps {
 	state: Point,
 	eventTypes: EventType[],
 	destinationsNames: Destination['name'][];
-	destination: Destination,
+	destination: Destination | '',
 }
 
 interface StateFullOffers extends Offer{
@@ -29,7 +31,7 @@ const enum Default {
 }
 
 class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
-	#destination: Destination;
+	#destination: Destination | '' = '';
 	#eventTypes: EventType[];
 	#destinationsNames: Destination['name'][];
 	#handlers: EventEditViewHandlers;
@@ -46,7 +48,7 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 	constructor(props: EventEditViewProps, handlers: EventEditViewHandlers) {
 		super();
 		this._setState(props.state);
-		this.#destination = props.destination;
+		this.#destination = (props.destination) ? props.destination : '';
 		this.#eventTypes = props.eventTypes;
 		this.#destinationsNames = props.destinationsNames;
 		this.#handlers = handlers;
@@ -78,8 +80,8 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 			throw new Error('Elements not found');
 		}
 
-		this.#switchButton!.addEventListener('click', this.#switchEventHandler);
-		this.#eventTypeSelect!.map((element) => element.addEventListener('click', this.#updateEventTypeHandler));
+		this.#switchButton!.addEventListener('click', this.#hideFormHandler);
+		this.#eventTypeSelect!.map((element) => element.addEventListener('change', this.#updateEventTypeHandler));
 		this.#destinationInput!.addEventListener('change', this.#updateDestinationHandler);
 		this.#priceInput!. addEventListener('change', this.#updatePriceHandler);
 		this.element!.addEventListener('submit', this.#formSubmitHandler);
@@ -107,28 +109,23 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 
 	startDateChange = (dateObj: Date[]) => {
 		if (dateObj[0].getTime() > this._state.dateTo.getTime()) {
-			this.updateElement({dateFrom: dateObj[0], dateTo:  dateObj[0], offers: this.#getCheckedOffers()});
+			this._setState({dateFrom: dateObj[0], dateTo:  dateObj[0], offers: this.#getCheckedOffers()});
 			return;
 		}
-		this.updateElement({dateFrom: dateObj[0], offers: this.#getCheckedOffers()});
+		this._setState({dateFrom: dateObj[0], offers: this.#getCheckedOffers()});
 	};
 
 	endDateChange = (dateObj: Date[]) => {
-		this.updateElement({dateTo: dateObj[0], offers: this.#getCheckedOffers()});
+		this._setState({dateTo: dateObj[0], offers: this.#getCheckedOffers()});
 	};
 
 	#removeListeners = () => {
-		this.#switchButton!.removeEventListener('click', this.#switchEventHandler);
-		this.#eventTypeSelect!.map((input) => input.removeEventListener('click', this.#updateEventTypeHandler));
+		this.#switchButton!.removeEventListener('click', this.#hideFormHandler);
+		this.#eventTypeSelect!.map((input) => input.removeEventListener('change', this.#updateEventTypeHandler));
 		this.#destinationInput!.removeEventListener('change', this.#updateDestinationHandler);
 		this.#priceInput!.removeEventListener('change', this.#updatePriceHandler);
 		this.element!.removeEventListener('submit', this.#formSubmitHandler);
 		this.element!.removeEventListener('reset', this.#formResetHandler);
-	};
-
-
-	#switchEventHandler = () => {
-		this.#handlers.switchHandler(this._state.id, Default.SWITCH_KIND);
 	};
 
 	#updateEventTypeHandler = (evt: Event) => {
@@ -155,7 +152,7 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 	#updatePriceHandler = (evt: Event) => {
 		evt.preventDefault();
 		const target = evt.target as HTMLInputElement;
-		this.updateElement({basePrice: Number(target.value), offers: this.#getCheckedOffers()});
+		this._setState({basePrice: Number(target.value), offers: this.#getCheckedOffers()});
 	};
 
 	#getCheckedOffers = (): string[] | [] => {
@@ -165,18 +162,38 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 
 	#formSubmitHandler = (evt: Event) => {
 		evt.preventDefault();
-		if(this.#destination.name === '') {
+		if(this.#destination === '' || this.#destination.name === '') {
 			this.shake();
 			return;
 		}
 		this.updateElement({offers: this.#getCheckedOffers()});
+		if (this._state.id === '') {
+			this.#handlers.createPoint(this._state);
+			this.#handlers.cancelHandler();
+
+			return;
+		}
+
 		this.#handlers.updatePoint(this._state);
 		this.#handlers.switchHandler(this._state.id,Default.SWITCH_KIND);
 	};
 
 	#formResetHandler = (evt: Event) => {
 		evt.preventDefault();
+		if (this._state.id === '') {
+			this.#handlers.cancelHandler();
+			return;
+		}
 		this.#handlers.deletePoint(this._state.id);
+	};
+
+	#hideFormHandler = (evt: Event) => {
+		evt.preventDefault();
+		if (this._state.id === '') {
+			this.#handlers.cancelHandler();
+			return;
+		}
+		this.#handlers.switchHandler(this._state.id,Default.SWITCH_KIND);
 	};
 
 	get template(): string {
@@ -191,6 +208,8 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 	}
 
 	removeElement() {
+		this.#startDate!.destroy();
+		this.#endDate!.destroy();
 		this.#removeListeners();
 		super.removeElement();
 	}
