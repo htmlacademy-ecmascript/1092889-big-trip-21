@@ -27,29 +27,27 @@ export default class EventsApiService extends ApiService {
 	}
 
 	async addPoint(point: Omit<ResponsePoint,'id'>) {
-		return this.#fetchData({
+		return await this._load({
 			url: 'points',
 			method: Method.POST,
 			body: JSON.stringify(point),
 			headers: new Headers({'Content-Type': 'application/json'})
-		});
+		}).then(ApiService.parseResponse);
 	}
 
 	async updatePoint(id: Point['id'], newPoint: Omit<ResponsePoint, 'id'>) {
-		return this.#fetchData({
+		return await this._load({
 			url: `points/${id}`,
 			method: Method.PUT,
 			body: JSON.stringify({...newPoint, id: id}),
-			headers: new Headers({'Content-Type': 'application/json'})
-		});
+			headers: new Headers({'Content-Type': 'application/json'}),
+		}).then(ApiService.parseResponse);
 	}
-
 
 	async removePoint(id: Point['id']) {
-		return this.#fetchData({
+		return await this._load({
 			url: `points/${id}`,
 			method: Method.DELETE,
-		});
+		}).then(ApiService.checkStatus);
 	}
-
 }
