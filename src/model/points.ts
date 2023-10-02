@@ -24,7 +24,7 @@ export default class PointsModel extends Observable {
 	async init() {
 		try {
 			const responsePoints = await this.#service.points;
-			this.#points = responsePoints.map((responsePoint: ResponsePoint) => convertToPoint(responsePoint));
+			this.#points = responsePoints.map(convertToPoint);
 			this._notify('INIT');
 		} catch {
 			throw new Error('Error while fetching data');
