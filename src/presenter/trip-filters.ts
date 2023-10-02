@@ -28,6 +28,34 @@ export default class TripFiltersPresenter {
 		this.render();
 	}
 
+	/*#handlePointsModelChange = (updateType: unknown, update: unknown) => {
+		switch (updateType) {
+			case 'INIT': {
+				if(this.#pointsModel.points!.length === 0) {
+					break;
+				}
+				this.#target = this.#getTarget();
+				this.render();
+				break;
+			}
+			case 'MAJOR' : {
+				if(this.#pointsModel.points!.length === 0) {
+					this.remove();
+					this.#target = null;
+					break;
+				}
+				if (!this.#target) {
+					this.#target = this.#getTarget();
+					this.render();
+					break;
+				}
+				const newTarget = this.#getTarget();
+				replace(newTarget,this.#target);
+				this.#target = newTarget;
+			}
+		}
+	};*/
+
 	#handleFilterChange = (updateType: unknown ,update: unknown) => {
 		this.#currentFilter = update as FilterType;
 	};

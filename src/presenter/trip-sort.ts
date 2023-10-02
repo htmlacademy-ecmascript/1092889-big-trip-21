@@ -1,5 +1,5 @@
 import {TripSortView} from '../view/trip-sort';
-import {render, replace} from '../framework/render';
+import {remove, render, replace} from '../framework/render';
 import {SORT_TYPE, SortType} from '../contracts/constants';
 import {Point} from '../contracts/contracts';
 import FilterModel from '../model/filter';
@@ -14,7 +14,7 @@ interface TripSortPresenterProps {
 }
 export default class TripSortPresenter {
 	#container: HTMLElement;
-	#target: TripSortView;
+	#target: TripSortView | null = null;
 	#filterModel: FilterModel;
 	#pointsModel: PointsModel;
 	#getCurrentPoints: () => Point[];
@@ -29,9 +29,36 @@ export default class TripSortPresenter {
 		this.#getCurrentPoints = props.getCurrentPoints;
 		this.#sortHandler = props.sortHandler;
 		this.#filterModel.addObserver(this.#handleFilterChange);
-		this.render();
+		this.#pointsModel.addObserver(this.#handlePointsModelChange);
 	}
-	///handlers for filterModel and empty points
+
+	#handlePointsModelChange = (updateType: unknown) => {
+		switch (updateType) {
+			case 'INIT': {
+				if(this.#pointsModel.points!.length === 0) {
+					break;
+				}
+				this.#target = this.#getTarget();
+				this.render();
+				break;
+			}
+			case 'MAJOR' : {
+				if(this.#pointsModel.points!.length === 0) {
+					this.remove();
+					this.#target = null;
+					break;
+				}
+				if (!this.#target) {
+					this.#target = this.#getTarget();
+					this.render();
+					break;
+				}
+				const newTarget = this.#getTarget();
+				replace(newTarget,this.#target);
+				this.#target = newTarget;
+			}
+		}
+	};
 
 	#handleFilterChange = () => {
 		this.#currentSort = SortType.DAY;
@@ -58,9 +85,14 @@ export default class TripSortPresenter {
 	};
 
 	updateTarget = () => {
-		const newTarget = this.#getTarget();
-		replace(newTarget, this.#target);
-		this.#target = newTarget;
+		if(this.#target) {
+			const newTarget = this.#getTarget();
+			replace(newTarget, this.#target);
+			this.#target = newTarget;
+			return;
+		}
+		this.#target = this.#getTarget();
+		this.render();
 	};
 
 	#updateSort = (sort: SortType) => {
@@ -71,10 +103,10 @@ export default class TripSortPresenter {
 	#getTarget = () => new TripSortView(this.#currentSort, this.#updateSort);
 
 	render = () => {
-		render(this.#target, this.#container,'afterbegin');
+		render(this.#target!, this.#container,'afterbegin');
 	};
 
-	remove = () => {
-		this.#target.removeElement();
-	};
+	remove () {
+		remove(this.#target!);
+	}
 }
