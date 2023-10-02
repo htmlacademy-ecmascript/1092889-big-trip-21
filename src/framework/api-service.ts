@@ -57,3 +57,5 @@ export default class ApiService {
 		throw err;
 	}
 }
+
+export type {LoadConfig};

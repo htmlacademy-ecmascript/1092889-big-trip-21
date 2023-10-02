@@ -1,16 +1,25 @@
 import {EventType, Offer, ResponseOffer} from '../contracts/contracts';
-import MockService from '../service/mock';
+import Observable from '../framework/observable';
+import EventsApiService from '../service/events-api-service';
 
-export default class OffersModel {
-	#service: MockService;
-	#responses: ResponseOffer[];
-	#offers: Map<Offer['id'], Offer>;
-	#eventTypes: ResponseOffer['type'][];
-	constructor(service: MockService) {
+export default class OffersModel extends Observable{
+	#service: EventsApiService;
+	#responses: ResponseOffer[] = [];
+	#offers: Map<Offer['id'], Offer> = new Map();
+	#eventTypes: ResponseOffer['type'][] = [];
+	constructor(service: EventsApiService) {
+		super();
 		this.#service = service;
-		this.#responses = this.#service.getOffers()!;
-		this.#eventTypes = Array.from(new Set(this.#responses.map((value) => value.type)));
-		this.#offers = this.#getMappedOffers();
+	}
+
+	async init() {
+		try {
+			this.#responses = await this.#service.offers;
+			this.#eventTypes = Array.from(new Set(this.#responses.map((value) => value.type)));
+			this.#offers = this.#getMappedOffers();
+		} catch {
+			throw new Error('Error while fetching data');
+		}
 	}
 
 	get eventTypes() {

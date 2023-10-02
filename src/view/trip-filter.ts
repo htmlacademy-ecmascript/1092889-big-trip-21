@@ -1,12 +1,15 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import {getTripFilterTemplate} from '../template/trip-filter';
-import {FILTER_TYPE} from '../contracts/constants';
+import {FilterType} from '../contracts/constants';
 
 class TripFilterView extends AbstractStatefulView<HTMLFormElement>{
 	#filterOptions: HTMLInputElement[] = [];
-	#updateFilter: (value: FILTER_TYPE) => void;
-	constructor(updateFilter: (value: FILTER_TYPE) => void) {
+	#updateFilter: (value: FilterType) => void;
+	#currentFilter: FilterType;
+
+	constructor(currentFilter: FilterType, updateFilter: (value: FilterType) => void) {
 		super();
+		this.#currentFilter = currentFilter;
 		this.#updateFilter = updateFilter;
 		this.initHandlers();
 	}
@@ -22,7 +25,7 @@ class TripFilterView extends AbstractStatefulView<HTMLFormElement>{
 		this.#toggleFilterOption(this.#filterOptions[currentTargetIndex]);
 
 		this.#filterOptions[currentTargetIndex] = target;
-		this.#updateFilter(target.value as FILTER_TYPE);
+		this.#updateFilter(target.value as FilterType);
 	};
 
 	#toggleFilterOption = (element: HTMLInputElement) => {
@@ -37,7 +40,7 @@ class TripFilterView extends AbstractStatefulView<HTMLFormElement>{
 	};
 
 	get template(): string {
-		return getTripFilterTemplate();
+		return getTripFilterTemplate(this.#currentFilter);
 	}
 }
 

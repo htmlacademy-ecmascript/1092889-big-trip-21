@@ -1,35 +1,62 @@
-import {remove, render} from '../framework/render';
+import {remove, render, replace} from '../framework/render';
 import OffersModel from '../model/offers';
 import PointsModel from '../model/points';
 import {TripInfoView} from '../view/trip-info';
-import {Destination} from '../contracts/contracts';
 import dayjs from 'dayjs';
+import DestinationsModel from '../model/destinations';
 
 interface TripInfoPresenterProps {
 	container: HTMLElement,
-	destinations: Destination[],
+	destinationsModel:DestinationsModel,
 	pointsModel: PointsModel,
 	offersModel: OffersModel
 }
 
 export default class TripInfoPresenter {
-	#destinations: Destination[];
+	#destinationsModel: DestinationsModel;
 	#pointsModel: PointsModel;
 	#offersModel: OffersModel;
 	#container: HTMLElement;
-	#target: TripInfoView;
+	#target: TripInfoView | null = null;
 
 	constructor(props: TripInfoPresenterProps) {
-		this.#destinations = props.destinations;
+		this.#destinationsModel = props.destinationsModel;
 		this.#pointsModel = props.pointsModel;
 		this.#offersModel = props.offersModel;
 		this.#container = props.container;
-		this.#target = this.#getTarget();
-		this.render();
+		this.#pointsModel.addObserver(this.#pointsModelChangeHandler);
 	}
 
+	#pointsModelChangeHandler = (updateType: unknown) => {
+		switch (updateType) {
+			case 'INIT': {
+				if(this.#pointsModel.points!.length === 0) {
+					break;
+				}
+				this.#target = this.#getTarget();
+				this.render();
+				break;
+			}
+			case 'MAJOR' : {
+				if(this.#pointsModel.points!.length === 0) {
+					this.remove();
+					this.#target = null;
+					break;
+				}
+				if (!this.#target) {
+					this.#target = this.#getTarget();
+					this.render();
+					break;
+				}
+				const newTarget = this.#getTarget();
+				replace(newTarget,this.#target);
+				this.#target = newTarget;
+			}
+		}
+	};
+
 	#getTarget = () => new TripInfoView({
-		destinations: this.#destinations.map((destination) => destination.name),
+		destinations: this.#getDestinations(),
 		price: this.#getPrice(),
 		dates:this.#getDates()
 
@@ -50,12 +77,18 @@ export default class TripInfoPresenter {
 		return [dayjs(sortedPoints[0].dateFrom).format('MMM D').toString(),dayjs(sortedPoints.at(-1)!.dateTo).format('MMM D')];
 	};
 
+	#getDestinations = () => {
+		const currentDestinations = this.#pointsModel.points!.map((point) => this.#destinationsModel.getById(point.destination));
+		return currentDestinations.map((destination) => destination.name);
+
+	};
+
 	render = () => {
-		render(this.#target, this.#container, 'afterbegin');
+		render(this.#target!, this.#container, 'afterbegin');
 	};
 
 	remove() {
-		remove(this.#target);
+		remove(this.#target!);
 	}
 }
 

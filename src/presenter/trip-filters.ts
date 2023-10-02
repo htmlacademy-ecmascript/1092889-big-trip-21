@@ -1,62 +1,107 @@
 import {TripFilterView} from '../view/trip-filter';
 import {render, replace} from '../framework/render';
-import {FILTER_TYPE} from '../contracts/constants';
-import {Point} from '../contracts/contracts';
+import {FilterType} from '../contracts/constants';
+import FilterModel from '../model/filter';
+import PointsModel from '../model/points';
 
 interface TripFiltersPresenterProps {
-	container: HTMLElement
-	getCurrentPoints: () => Point[];
+	container: HTMLElement,
+	filterModel: FilterModel,
+	pointsModel: PointsModel,
 	filterHandler: () => void
 }
 
 export default class TripFiltersPresenter {
 	#container: HTMLElement;
 	#target: TripFilterView;
-	#getCurrentPoints: () => Point[];
-	#currentFilter: FILTER_TYPE = 'everything';
+	#filterModel: FilterModel;
+	#pointsModel: PointsModel;
+	#currentFilter: FilterType = FilterType.ALL;
 	#filterHandler: () => void;
 	constructor(props: TripFiltersPresenterProps){
 		this.#container = props.container;
-		this.#getCurrentPoints = props.getCurrentPoints;
+		this.#filterModel = props.filterModel;
+		this.#pointsModel = props.pointsModel;
 		this.#target = this.#getTarget();
 		this.#filterHandler = props.filterHandler;
+		this.#filterModel.addObserver(this.#handleFilterChange);
 		this.render();
 	}
 
-	#filterPoints = (value: FILTER_TYPE) => {
-		const currentTime = new Date();
+	/*#handlePointsModelChange = (updateType: unknown, update: unknown) => {
+		switch (updateType) {
+			case 'INIT': {
+				if(this.#pointsModel.points!.length === 0) {
+					break;
+				}
+				this.#target = this.#getTarget();
+				this.render();
+				break;
+			}
+			case 'MAJOR' : {
+				if(this.#pointsModel.points!.length === 0) {
+					this.remove();
+					this.#target = null;
+					break;
+				}
+				if (!this.#target) {
+					this.#target = this.#getTarget();
+					this.render();
+					break;
+				}
+				const newTarget = this.#getTarget();
+				replace(newTarget,this.#target);
+				this.#target = newTarget;
+			}
+		}
+	};*/
 
-		const points = [...this.#getCurrentPoints()].sort((a,b) => a.dateFrom.getTime() - b.dateFrom.getTime());
-		const presentIndex = points.findIndex((point) => point.dateTo.getTime() >= currentTime.getTime() && point.dateFrom.getTime() <= currentTime.getTime());
-		const filteredPoints = new Map([
-			['everything', points],
-			['present', [points[presentIndex]]],
-			['past', points.slice(0, presentIndex)],
-			['future', points.slice(presentIndex + 1)]
-		]);
-		return filteredPoints.get(value);
+	#handleFilterChange = (updateType: unknown ,update: unknown) => {
+		this.#currentFilter = update as FilterType;
 	};
 
-	getFilteredPoints = (filter?: FILTER_TYPE) => {
-		if (filter) {
-			this.#currentFilter = filter;
-			const newTarget = this.#getTarget();
-			replace(newTarget, this.#target);
-			this.#target = newTarget;
-			return this.#filterPoints(filter);
-		}
+	#filterPoints = (value: FilterType) => {
+		const currentTime = new Date();
+		const getPoints = () => [...this.#pointsModel.points!].sort((a,b) => a.dateFrom.getTime() - b.dateFrom.getTime());
+
+		const getFuturePoints = () => getPoints().filter((point) => point.dateFrom.getTime() > currentTime.getTime());
+
+		const getPastPoints = () => getPoints().filter((point) => point.dateFrom.getTime() < currentTime.getTime());
+		const getPresentPoints = () => getPoints().filter((point) => point.dateFrom.getTime() <= currentTime.getTime() && point.dateTo.getTime() >= currentTime.getTime());
+
+		const filteredPoints = new Map([
+			[FilterType.ALL, getPoints()],
+			[FilterType.PRESENT, getPresentPoints!()],
+			[FilterType.PAST, getPastPoints!()],
+			[FilterType.FUTURE, getFuturePoints!()]
+		]);
+		const res = filteredPoints.get(value);
+		return (!res) ? [] : res;
+	};
+
+	getFilteredPoints = () => {
+		this.updateTarget();
 		return this.#filterPoints(this.#currentFilter);
 	};
 
-	#updateFilter = (filter: FILTER_TYPE) => {
+	updateTarget = () => {
+		const newTarget = this.#getTarget();
+		replace(newTarget, this.#target);
+		this.#target = newTarget;
+	};
+
+	#updateFilter = (filter: FilterType) => {
 		this.#currentFilter = filter;
+		this.#filterModel.changeFilter(filter);
 		this.#filterHandler();
 	};
 
-	#getTarget = () => new TripFilterView(this.#updateFilter);
+	#getTarget = () => new TripFilterView(this.#currentFilter ,this.#updateFilter);
 
 
 	render = () => {
 		render(this.#target, this.#container);
 	};
+
+
 }

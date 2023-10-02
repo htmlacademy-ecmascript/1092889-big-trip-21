@@ -1,15 +1,25 @@
-import MockService from '../service/mock';
+
 import {Destination} from '../contracts/contracts';
+import EventsApiService from '../service/events-api-service';
+import Observable from '../framework/observable';
 
-export default class DestinationsModel {
-	#service: MockService;
-	#destinations: Destination[];
-	#destinationsNames: Destination['name'][];
+export default class DestinationsModel extends Observable{
+	#service: EventsApiService;
+	#destinations: Destination[] = [];
+	#destinationsNames: Destination['name'][] = [];
 
-	constructor(service: MockService) {
+	constructor(service: EventsApiService) {
+		super();
 		this.#service = service;
-		this.#destinations = this.#service.getDestinations()!;
-		this.#destinationsNames = this.#destinations.map((destination) => destination.name);
+	}
+
+	async init() {
+		try {
+			this.#destinations = await this.#service.destinations!.then((response) => response);
+			this.#destinationsNames = this.#destinations.map((destination) => destination.name);
+		} catch {
+			throw new Error('Error while fetching data');
+		}
 	}
 
 	get destinations() {

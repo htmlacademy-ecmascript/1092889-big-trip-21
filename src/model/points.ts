@@ -1,14 +1,40 @@
 import {Point} from '../contracts/contracts';
-import MockService from '../service/mock';
 import Observable from '../framework/observable';
+import EventsApiService from '../service/events-api-service';
+import {convertToPoint, convertToResponsePoint} from '../utils/adapters';
 
 export default class PointsModel extends Observable {
-	#service: MockService | null = null;
+	#service: EventsApiService;
 	#points: Point[]| null = null;
-	constructor(service: MockService){
+	constructor(service: EventsApiService){
 		super();
 		this.#service = service;
-		this.#points = service.getPoints();
+	}
+
+	getBlankPoint = ():Omit<Point, 'id'> => {
+		const dateFrom = new Date();
+		const dateTo = new Date();
+		dateTo.setSeconds(dateFrom.getSeconds() + 100);
+
+		return {
+			basePrice: 0,
+			dateFrom,
+			dateTo,
+			destination:'',
+			isFavorite: false,
+			offers: [],
+			type: 'flight'
+		};
+	};
+
+	async init() {
+		try {
+			const responsePoints = await this.#service.points;
+			this.#points = responsePoints.map(convertToPoint);
+			this._notify('INIT');
+		} catch {
+			throw new Error('Error while fetching data');
+		}
 	}
 
 	get points() {
@@ -19,27 +45,46 @@ export default class PointsModel extends Observable {
 		return this.#points!.filter((point) => point.id === id)[0];
 	}
 
-	createPoint = (point: Point) => {
-		this.#service!.addPoint(point);
-		this.#points = this.#service!.getPoints();
-		this._notify('MAJOR', this.points);
+	async createPoint(point: Point) {
+		try {
+			await this.#service!.addPoint(convertToResponsePoint(point));
+			const responsePoints = await this.#service.points;
+			this.#points = responsePoints.map(convertToPoint);
+			this._notify('MAJOR', this.points);
+		} catch {
+			throw new Error('Error while creating Point');
+		}
+	}
+
+	async updatePoint(point: Point) {
+		try {
+			await this.#service!.updatePoint(point.id, convertToResponsePoint(point));
+			const responsePoints = await this.#service.points;
+			this.#points = responsePoints.map(convertToPoint);
+			this._notify('MAJOR', this.points);
+		} catch {
+			throw new Error('Error while updating Point');
+		}
+	}
+
+	updateFavorite = async (point: Point) =>{
+		try {
+			const newPoint = await this.#service!.updatePoint(point.id, convertToResponsePoint({...point, isFavorite: !point.isFavorite }));
+			this._notify('PATCH', convertToPoint(newPoint));
+		} catch {
+			throw new Error('Error while updating Favorite');
+		}
 	};
 
-	updatePoint = (point: Point) => {
-		this.#service!.updatePoint(point.id, point);
-		this.#points = this.#service!.getPoints();
-		this._notify('MAJOR', this.points);
-	};
-
-	updateFavorite = (point: Point) =>{
-		const newPoint = this.#service!.updatePoint(point.id, {...point, isFavourite: !point.isFavourite });
-		this._notify('PATCH', newPoint);
-	};
-
-	delete(id: Point['id']) {
-		this.#service?.removePoint(id);
-		this.#points = this.#service!.getPoints();
-		this._notify('MAJOR', this.points);
+	async delete(id: Point['id']) {
+		try {
+			await this.#service.removePoint(id);
+			const responsePoints = await this.#service.points;
+			this.#points = responsePoints.map(convertToPoint);
+			this._notify('MAJOR', this.points);
+		} catch {
+			throw new Error('Error while deleting Point');
+		}
 	}
 }
 
