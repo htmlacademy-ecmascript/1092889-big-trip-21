@@ -1,4 +1,4 @@
-import {Point, ResponsePoint} from '../contracts/contracts';
+import {Point} from '../contracts/contracts';
 import Observable from '../framework/observable';
 import EventsApiService from '../service/events-api-service';
 import {convertToPoint, convertToResponsePoint} from '../utils/adapters';
@@ -49,7 +49,7 @@ export default class PointsModel extends Observable {
 		try {
 			await this.#service!.addPoint(convertToResponsePoint(point));
 			const responsePoints = await this.#service.points;
-			this.#points = responsePoints.map((responsePoint: ResponsePoint) => convertToPoint(responsePoint));
+			this.#points = responsePoints.map(convertToPoint);
 			this._notify('MAJOR', this.points);
 		} catch {
 			throw new Error('Error while creating Point');
@@ -60,7 +60,7 @@ export default class PointsModel extends Observable {
 		try {
 			await this.#service!.updatePoint(point.id, convertToResponsePoint(point));
 			const responsePoints = await this.#service.points;
-			this.#points = responsePoints.map((responsePoint: ResponsePoint) => convertToPoint(responsePoint));
+			this.#points = responsePoints.map(convertToPoint);
 			this._notify('MAJOR', this.points);
 		} catch {
 			throw new Error('Error while updating Point');
@@ -80,7 +80,7 @@ export default class PointsModel extends Observable {
 		try {
 			await this.#service.removePoint(id);
 			const responsePoints = await this.#service.points;
-			this.#points = responsePoints.map((responsePoint: ResponsePoint) => convertToPoint(responsePoint));
+			this.#points = responsePoints.map(convertToPoint);
 			this._notify('MAJOR', this.points);
 		} catch {
 			throw new Error('Error while deleting Point');
