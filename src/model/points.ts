@@ -11,15 +11,21 @@ export default class PointsModel extends Observable {
 		this.#service = service;
 	}
 
-	getBlankPoint = ():Omit<Point, 'id'> => ({
-		basePrice: 0,
-		dateFrom: new Date(),
-		dateTo: new Date(),
-		destination:'',
-		isFavorite: false,
-		offers: [],
-		type: 'flight'
-	});
+	getBlankPoint = ():Omit<Point, 'id'> => {
+		const dateFrom = new Date();
+		const dateTo = new Date();
+		dateTo.setSeconds(dateFrom.getSeconds() + 100);
+
+		return {
+			basePrice: 0,
+			dateFrom,
+			dateTo,
+			destination:'',
+			isFavorite: false,
+			offers: [],
+			type: 'flight'
+		};
+	};
 
 	async init() {
 		try {
