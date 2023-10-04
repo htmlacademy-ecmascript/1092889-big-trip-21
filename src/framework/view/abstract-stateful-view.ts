@@ -2,38 +2,38 @@ import AbstractView from './abstract-view';
 
 export default class AbstractStatefulView<State, El extends Element = HTMLDivElement> extends AbstractView<El> {
 
-	protected _state = {} as State;
+  protected _state = {} as State;
 
 
-	updateElement(update: Partial<State>) {
-		if (!update) {
-			return;
-		}
+  updateElement(update: Partial<State>) {
+    if (!update) {
+      return;
+    }
 
-		this._setState(update);
-		this.#rerenderElement();
-	}
+    this._setState(update);
+    this.#rerenderElement();
+  }
 
-	/** @abstract */
-	_restoreHandlers() {
-		throw new Error('Abstract method not implemented: restoreHandlers');
-	}
-
-
-	_setState(update: State | Partial<State>) {
-		this._state = structuredClone({...this._state, ...update});
-	}
+  /** @abstract */
+  _restoreHandlers() {
+    throw new Error('Abstract method not implemented: restoreHandlers');
+  }
 
 
-	#rerenderElement() {
-		const prevElement = this.element;
-		const parent = prevElement.parentElement;
-		this.removeElement();
+  _setState(update: State | Partial<State>) {
+    this._state = structuredClone({...this._state, ...update});
+  }
 
-		const newElement = this.element;
 
-		parent?.replaceChild(newElement, prevElement);
+  #rerenderElement() {
+    const prevElement = this.element;
+    const parent = prevElement.parentElement;
+    this.removeElement();
 
-		this._restoreHandlers();
-	}
+    const newElement = this.element;
+
+    parent?.replaceChild(newElement, prevElement);
+
+    this._restoreHandlers();
+  }
 }

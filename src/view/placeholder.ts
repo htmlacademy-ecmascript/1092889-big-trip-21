@@ -3,21 +3,20 @@ import {FilterType} from '../contracts/constants';
 import AbstractView from '../framework/view/abstract-view';
 
 class PlaceholderView extends AbstractView{
-	#filterType: FilterType = FilterType.ALL;
-	constructor(filterType: FilterType) {
-		super();
-		this.#filterType = filterType;
-	}
+  #filterType: FilterType = FilterType.ALL;
+  constructor(filterType: FilterType) {
+    super();
+    this.#filterType = filterType;
+  }
 
 
-	get template(): string {
-		return getPlaceholderTemplate(this.#filterType);
-	}
+  get template(): string {
+    return getPlaceholderTemplate(this.#filterType);
+  }
 
-	removeElement() {
-		super.removeElement();
-	}
+  removeElement() {
+    super.removeElement();
+  }
 }
 
 export {PlaceholderView};
-

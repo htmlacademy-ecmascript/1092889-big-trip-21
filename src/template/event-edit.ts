@@ -1,46 +1,46 @@
-import {EventEditViewProps, StateFullOffers} from '../view/event-edit';
+import {EventEditViewProps, StatefulOffer} from '../view/event-edit';
 import {Destination, EventType, Point} from '../contracts/contracts';
 import dayjs from 'dayjs';
 
 
 const getEventTypesSelectTemplate = (eventTypes: EventType[], currentType: Point['type']) => (
-	eventTypes.map((eventType) => (
-		`<div class="event__type-item">
-			<input id="event-type-${eventType.toLowerCase()}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${eventType}" ${(eventType === currentType) ? 'checked' : ''}>
-			<label class="event__type-label  event__type-label--${eventType.toLowerCase()}" for="event-type-${eventType.toLowerCase()}-1">${eventType}</label>
-		</div>`)).join(''));
+  eventTypes.map((eventType) => (
+    `<div class="event__type-item">
+      <input id="event-type-${eventType.toLowerCase()}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${eventType}" ${(eventType === currentType) ? 'checked' : ''}>
+      <label class="event__type-label  event__type-label--${eventType.toLowerCase()}" for="event-type-${eventType.toLowerCase()}-1">${eventType}</label>
+    </div>`)).join(''));
 
-const getOffersTemplate = (offers: StateFullOffers[]) => (
-	`<section class="event__section  event__section--offers">
-		<h3 class="event__section-title  event__section-title--offers">Offers</h3>
-		<div class="event__available-offers">
-			${(offers.map((offer) => (`
-				<div class="event__offer-selector">
-					<input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.title}-${offer.id}" type="checkbox" name="event-offer-${offer.title}" ${(offer.checked) ? 'checked' : ''}>
-					<label class="event__offer-label" for="event-offer-${offer.title}-${offer.id}">
-						<span class="event__offer-title">${offer.title}</span>
-						&plus;&euro;&nbsp;
-						<span class="event__offer-price">${offer.price}</span>
-					</label>
-				</div>`)).join(''))}
-		</div>
-	</section>`);
+const getOffersTemplate = (offers: StatefulOffer[]) => (
+  `<section class="event__section  event__section--offers">
+    <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+    <div class="event__available-offers">
+      ${(offers.map((offer) => (`
+        <div class="event__offer-selector">
+          <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.title}-${offer.id}" type="checkbox" name="event-offer-${offer.title}" ${(offer.checked) ? 'checked' : ''}>
+          <label class="event__offer-label" for="event-offer-${offer.title}-${offer.id}">
+            <span class="event__offer-title">${offer.title}</span>
+            &plus;&euro;&nbsp;
+            <span class="event__offer-price">${offer.price}</span>
+          </label>
+        </div>`)).join(''))}
+    </div>
+  </section>`);
 
 const getDestinationTemplate = (destination: Destination) => (
-	`<section class="event__section  event__section--destination">
-		<h3 class="event__section-title  event__section-title--destination">Destination</h3>
-		<p class="event__destination-description">${destination.description}</p>
-		${(destination.pictures.length >= 1) ?
-		`<div class="event__photos-container">
-			<div class="event__photos-tape">
-				${destination.pictures.map((picture) => `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`).join('')}
-			</div>
-		</div>` : ''}
-	</section>`);
+  `<section class="event__section  event__section--destination">
+    <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+    <p class="event__destination-description">${destination.description}</p>
+    ${(destination.pictures.length >= 1) ?
+    `<div class="event__photos-container">
+      <div class="event__photos-tape">
+        ${destination.pictures.map((picture) => `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`).join('')}
+      </div>
+    </div>` : ''}
+  </section>`);
 
-const getEventEditTemplate = ({state, eventTypes, destinationsNames, destination}: Omit<EventEditViewProps, 'offers'>, offers: StateFullOffers[]) =>
-	`<form class="event event--edit" action="#" method="post">
-		<header class="event__header">
+const getEventEditTemplate = ({state, eventTypes, destinationsNames, destination}: Omit<EventEditViewProps, 'offers'>, offers: StatefulOffer[]) =>
+  `<form class="event event--edit" action="#" method="post">
+    <header class="event__header">
                       <div class="event__type-wrapper">
                         <label class="event__type  event__type-btn" for="event-type-toggle-1">
                           <span class="visually-hidden">Choose event type</span>
@@ -51,7 +51,7 @@ const getEventEditTemplate = ({state, eventTypes, destinationsNames, destination
                         <div class="event__type-list">
                           <fieldset class="event__type-group">
                             <legend class="visually-hidden">Event type</legend>
-							${getEventTypesSelectTemplate(eventTypes, state.type)}
+              ${getEventTypesSelectTemplate(eventTypes, state.type)}
                           </fieldset>
                         </div>
                       </div>
@@ -89,8 +89,8 @@ const getEventEditTemplate = ({state, eventTypes, destinationsNames, destination
                       </button>
                     </header>
                     <section class="event__details">
-						${(offers.length >= 1) ? getOffersTemplate(offers) : ''}
-						${(destination && destination.description.length) ? getDestinationTemplate(destination) : ''}
+            ${(offers.length >= 1) ? getOffersTemplate(offers) : ''}
+            ${(destination && destination.description.length) ? getDestinationTemplate(destination) : ''}
                     </section>
                   </form>`;
 
