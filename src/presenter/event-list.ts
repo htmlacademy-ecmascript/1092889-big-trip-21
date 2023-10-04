@@ -16,6 +16,7 @@ interface EventListPresenterProps {
 	pointsModel: PointsModel,
 	offersModel: OffersModel,
 	destinationsModel: DestinationsModel,
+	addEventCloseHandler: () => void;
 }
 
 
@@ -24,6 +25,7 @@ interface EventListItem {
 	content: AbstractPresenter;
 }
 type EventKinds = 'Thumbnail' | 'Edit';
+
 
 type SwitchEventsHandler = (id: Point['id'], kind: EventKinds) => void;
 
@@ -36,7 +38,7 @@ class EventListPresenter {
 	#pointsModel: PointsModel;
 	#offersModel: OffersModel;
 	#destinationsModel: DestinationsModel;
-
+	#addEventCloseHandler: () => void;
 	#activeElement: AbstractPresenter | null = null;
 	constructor(props: EventListPresenterProps) {
 		this.#points = props.points;
@@ -44,7 +46,7 @@ class EventListPresenter {
 		this.#pointsModel = props.pointsModel;
 		this.#offersModel = props.offersModel;
 		this.#destinationsModel = props.destinationsModel;
-
+		this.#addEventCloseHandler = props.addEventCloseHandler;
 		render(this.#eventList, this.#container);
 		this.updateTripList(this.#points);
 		this.#pointsModel.addObserver(this.#pointsModelChangeHandler as (updateType: unknown, update: unknown) => void);
@@ -77,7 +79,7 @@ class EventListPresenter {
 		this.#addEscapeHandler();
 	};
 
-	createEditEvent = (container: EventListItemView,id?: Point['id']) => new EventEditPresenter({
+	createEditEvent = (container: EventListItemView, id?: Point['id']) => new EventEditPresenter({
 		container: container,
 		state: (id) ? this.#pointsModel.getById(id) : null,
 		pointsModel: this.#pointsModel,
@@ -85,7 +87,7 @@ class EventListPresenter {
 		offersModel: this.#offersModel,
 		handlers: {
 			switchEvent: this.#switchEventsHandler,
-			cancelEventAdd: this.#switchActiveElement
+			cancelEventAdd: this.#switchActiveElement,
 		}
 	});
 
@@ -96,15 +98,14 @@ class EventListPresenter {
 		if (kind === 'Edit') {
 			const editEvent = this.createEditEvent(wrapper.container, id);
 			wrapper.content = editEvent;
-			this.#activeElement = editEvent;
+			this.#switchActiveElement(editEvent);
 			this.#addEscapeHandler();
 			return;
 		}
 		this.#removeEscapeHandler();
 		this.#activeElement = null;
 		const point = this.#pointsModel.getById(id);
-		const event = this.createEvent(point, wrapper.container);
-		wrapper.content = event;
+		wrapper.content = this.createEvent(point, wrapper.container);
 	};
 
 	#switchActiveElement = (element: AbstractPresenter | null) => {
@@ -114,6 +115,7 @@ class EventListPresenter {
 				this.#activeElement = element;
 				return;
 			}
+			this.#addEventCloseHandler();
 			this.#activeElement.remove();
 		}
 		this.#activeElement = element;
@@ -158,8 +160,7 @@ class EventListPresenter {
 			case 'PATCH': {
 				const pointItem = this.#listItems.find((item) => item.content.id === update.id as Point['id'])!;
 				pointItem.content.remove();
-				const event = this.createEvent(update as Point, pointItem.container);
-				pointItem.content = event;
+				pointItem.content = this.createEvent(update as Point, pointItem.container);
 			}
 		}
 	};

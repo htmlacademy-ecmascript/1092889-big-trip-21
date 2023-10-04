@@ -55,8 +55,12 @@ class EventThumbnailView extends AbstractView<HTMLDivElement>{
 		this.#handlers.switchEvent(this.#state.id, Default.SWITCH_KIND);
 	};
 
-	#toggleFavouriteHandler = () => {
-		this.#handlers.updateFavourite();
+	#toggleFavouriteHandler = async () => {
+		try {
+			await this.#handlers.updateFavourite();
+		}catch (e){
+			this.shake();
+		}
 	};
 
 	calculateDuration = ({dateFrom, dateTo}: Point) => getRelativeTime(dayjs(dateFrom), dayjs(dateTo));

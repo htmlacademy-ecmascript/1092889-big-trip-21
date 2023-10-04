@@ -1,8 +1,7 @@
 import {getEventEditTemplate} from '../template/event-edit';
-import {Destination, EventType, Offer, Point} from '../contracts/contracts';
+import {BlankPoint, Destination, EventType, Offer, Point} from '../contracts/contracts';
 import {SwitchEventsHandler} from '../presenter/event-list';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
-import { getDestinationTemplate } from '../model/templates/templates';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.css';
 
@@ -10,6 +9,7 @@ interface EventEditViewHandlers {
 	getOffersByType: (eventType: EventType) => Offer[],
 	getOffersById: (...id: string[]) => Offer[],
 	getDestinationByName: (destinationName: Destination['name']) => Destination,
+	getDestinationTemplate: Destination;
 	switchHandler: SwitchEventsHandler,
 	deletePoint: (id: Point['id']) => void,
 	updatePoint:(state: Point) => void,
@@ -17,7 +17,7 @@ interface EventEditViewHandlers {
 	createPoint:(state: Point) => void,
 }
 interface EventEditViewProps {
-	state: Point,
+	state: Point | BlankPoint,
 	eventTypes: EventType[],
 	destinationsNames: Destination['name'][];
 	destination: Destination | '',
@@ -30,7 +30,7 @@ const enum Default {
 	SWITCH_KIND = 'Thumbnail'
 }
 
-class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
+class EventEditView extends AbstractStatefulView<Point | BlankPoint, HTMLFormElement>{
 	#destination: Destination | '' = '';
 	#eventTypes: EventType[];
 	#destinationsNames: Destination['name'][];
@@ -38,7 +38,10 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 	#offers: Offer[] = [];
 
 	#switchButton: HTMLButtonElement | null = null;
+	#submitButton: HTMLButtonElement | null = null;
+	#resetButton: HTMLButtonElement | null = null;
 	#eventTypeSelect: HTMLInputElement[] | null = null;
+	#eventTypeToggle: HTMLInputElement | null = null;
 	#destinationInput: HTMLInputElement | null = null;
 	#priceInput: HTMLInputElement | null = null;
 	#offersCheckboxes: HTMLInputElement[] = [];
@@ -69,8 +72,11 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 	}
 
 	#initHandlers = () => {
+		this.#submitButton = this.element.querySelector('.event__save-btn')! as HTMLButtonElement;
+		this.#resetButton = this.element.querySelector('.event__reset-btn')! as HTMLButtonElement;
 		this.#switchButton = this.element.querySelector('.event__rollup-btn')!;
 		this.#eventTypeSelect = Array.from(this.element.querySelectorAll('.event__type-list input')!);
+		this.#eventTypeToggle = this.element.querySelector('.event__type-toggle');
 		this.#destinationInput = this.element.querySelector('.event__input--destination');
 		this.#priceInput = this.element.querySelector('.event__input--price');
 		this.#offersCheckboxes = Array.from(this.element?.querySelectorAll('.event__offer-checkbox'));
@@ -93,13 +99,13 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 		const endDate = this.element.querySelector('#event-end-time-1');
 
 		this.#startDate = flatpickr(startDate!, {
-			dateFormat: 'y/m/d H:i',
+			dateFormat: 'd/m/y H:i',
 			defaultDate: new Date(this._state.dateFrom),
 			enableTime: true,
 			onClose: this.startDateChange
 		});
 		this.#endDate = flatpickr(endDate!, {
-			dateFormat: 'y/m/d H:i',
+			dateFormat: 'd/m/y H:i',
 			minDate: new Date(this._state.dateFrom),
 			defaultDate: new Date(this._state.dateTo),
 			enableTime: true,
@@ -108,10 +114,6 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 	};
 
 	startDateChange = (dateObj: Date[]) => {
-		if (dateObj[0].getTime() > this._state.dateTo.getTime()) {
-			this._setState({dateFrom: dateObj[0], dateTo:  dateObj[0], offers: this.#getCheckedOffers()});
-			return;
-		}
 		this._setState({dateFrom: dateObj[0], offers: this.#getCheckedOffers()});
 	};
 
@@ -144,7 +146,7 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 			this.#destination = this.#handlers.getDestinationByName(target.value as Destination['name']);
 			this.updateElement({destination: this.#destination.id, offers: offers});
 		} else {
-			this.#destination = getDestinationTemplate();
+			this.#destination = this.#handlers.getDestinationTemplate;
 			this.updateElement({destination: this.#destination.id, offers: offers});
 		}
 	};
@@ -160,31 +162,47 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 		return (checkedOffers.length) ? checkedOffers!.map((element) => element.id.slice(-36)) : [];
 	};
 
-	#formSubmitHandler = (evt: Event) => {
+	#formSubmitHandler = async (evt: Event) => {
 		evt.preventDefault();
-		if(this.#destination === '' || this.#destination.name === '') {
-			this.shake();
-			return;
-		}
-		this.updateElement({offers: this.#getCheckedOffers()});
+
+		this._setState({...this._state, offers: this.#getCheckedOffers()});
+		this.#setDisabledState();
+		this.changeButtonState(this.#submitButton!);
 		if (this._state.id === '') {
-			this.#handlers.createPoint(this._state);
+			try {
+				await this.#handlers.createPoint(this._state as Point);
+			} catch (e) {
+				this.changeButtonState(this.#submitButton!);
+				this.shake(this.#removeDisabledState);
+				return;
+			}
 			this.#handlers.cancelHandler();
-
 			return;
 		}
-
-		this.#handlers.updatePoint(this._state);
+		try {
+			await this.#handlers.updatePoint(this._state as Point);
+		} catch (e) {
+			this.changeButtonState(this.#submitButton!);
+			this.shake(this.#removeDisabledState);
+			return;
+		}
 		this.#handlers.switchHandler(this._state.id,Default.SWITCH_KIND);
 	};
 
-	#formResetHandler = (evt: Event) => {
+	#formResetHandler = async (evt: Event) => {
 		evt.preventDefault();
+		this.#setDisabledState();
 		if (this._state.id === '') {
 			this.#handlers.cancelHandler();
 			return;
 		}
-		this.#handlers.deletePoint(this._state.id);
+		this.changeButtonState(this.#resetButton!);
+		try {
+			await this.#handlers.deletePoint(this._state.id);
+		} catch (e) {
+			this.changeButtonState(this.#resetButton!);
+			this.shake(this.#removeDisabledState);
+		}
 	};
 
 	#hideFormHandler = (evt: Event) => {
@@ -193,7 +211,51 @@ class EventEditView extends AbstractStatefulView<Point, HTMLFormElement>{
 			this.#handlers.cancelHandler();
 			return;
 		}
-		this.#handlers.switchHandler(this._state.id,Default.SWITCH_KIND);
+		this.#handlers.switchHandler(this._state.id, Default.SWITCH_KIND);
+	};
+
+	#setDisabledState = () => {
+		this.#switchButton!.disabled = true;
+		this.#eventTypeToggle!.disabled = true;
+		this.#eventTypeSelect!.forEach((input) => {
+			input.disabled = true;
+		});
+		this.#destinationInput!.disabled = true;
+		this.#priceInput!.disabled = true;
+		this.#offersCheckboxes.forEach((checkbox) => {
+			checkbox.disabled = true;
+		});
+		this.#startDate!.input.disabled = true;
+		this.#endDate!.input.disabled = true;
+		this.#submitButton!.disabled = true;
+		this.#resetButton!.disabled = true;
+	};
+
+	changeButtonState = (button: HTMLButtonElement) => {
+		if(button.textContent!.endsWith('...')){
+			const text = button.textContent!.slice(0,-6);
+			button.textContent = `${text}e`;
+			return;
+		}
+		const text = button.textContent!.slice(0,-1);
+		button.textContent = `${text}ing...`;
+	};
+
+	#removeDisabledState = () => {
+		this.#switchButton!.disabled = false;
+		this.#eventTypeToggle!.disabled = false;
+		this.#eventTypeSelect!.forEach((input) => {
+			input.disabled = false;
+		});
+		this.#destinationInput!.disabled = false;
+		this.#priceInput!.disabled = false;
+		this.#offersCheckboxes.forEach((checkbox) => {
+			checkbox.disabled = false;
+		});
+		this.#startDate!.input.disabled = false;
+		this.#endDate!.input.disabled = false;
+		this.#submitButton!.disabled = false;
+		this.#resetButton!.disabled = false;
 	};
 
 	get template(): string {

@@ -45,6 +45,17 @@ type Point = {
 	type:EventType
 }
 
+type BlankPoint = {
+	id: '',
+	basePrice: number,
+	dateFrom: Date | '',
+	dateTo: Date | '',
+	destination: Destination['id'],
+	isFavorite: boolean,
+	offers: Offer['id'][],
+	type:EventType
+}
+
 export type {
 	EventType,
 	Offer,
@@ -52,5 +63,6 @@ export type {
 	Destination,
 	ResponseOffer,
 	ResponsePoint,
-	Point
+	Point,
+	BlankPoint
 };

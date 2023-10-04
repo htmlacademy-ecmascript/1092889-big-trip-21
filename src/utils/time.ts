@@ -1,23 +1,6 @@
 import * as dayjs from 'dayjs';
-import {generateRandomNumber} from './randomizers';
 
 const addLeadingZero = (number: number): string => (number.toString().length <= 1) ? `0${number}` : number.toString();
-
-
-const getTimePairsInit = (startTime: dayjs.Dayjs) => {
-	let initialTime = startTime;
-	return () => {
-		const newTime = initialTime.add(generateRandomNumber(0,2), 'day')
-			.add(generateRandomNumber(0,24), 'hours')
-			.add(generateRandomNumber(0,60), 'minutes');
-		const res = {
-			dateFrom: initialTime,
-			dateTo: newTime
-		};
-		initialTime = newTime;
-		return res;
-	};
-};
 
 const getRelativeTime = (firstTime: dayjs.Dayjs, secondTime: dayjs.Dayjs) => {
 
@@ -43,5 +26,5 @@ const getRelativeTime = (firstTime: dayjs.Dayjs, secondTime: dayjs.Dayjs) => {
 };
 
 
-export {getTimePairsInit, getRelativeTime};
+export {getRelativeTime};
 

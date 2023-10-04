@@ -1,14 +1,17 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import {getTripFilterTemplate} from '../template/trip-filter';
 import {FilterType} from '../contracts/constants';
+import {Point} from '../contracts/contracts';
 
 class TripFilterView extends AbstractStatefulView<HTMLFormElement>{
 	#filterOptions: HTMLInputElement[] = [];
 	#updateFilter: (value: FilterType) => void;
 	#currentFilter: FilterType;
+	#filteredPoints: Map<FilterType, Point[]>;
 
-	constructor(currentFilter: FilterType, updateFilter: (value: FilterType) => void) {
+	constructor(currentFilter: FilterType, filteredPoints: Map<FilterType, Point[]>, updateFilter: (value: FilterType) => void) {
 		super();
+		this.#filteredPoints = filteredPoints;
 		this.#currentFilter = currentFilter;
 		this.#updateFilter = updateFilter;
 		this.initHandlers();
@@ -40,7 +43,7 @@ class TripFilterView extends AbstractStatefulView<HTMLFormElement>{
 	};
 
 	get template(): string {
-		return getTripFilterTemplate(this.#currentFilter);
+		return getTripFilterTemplate(this.#currentFilter, this.#filteredPoints);
 	}
 }
 

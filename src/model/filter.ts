@@ -1,8 +1,8 @@
 import Observable from '../framework/observable';
-import {FILTER_TYPE, FilterType} from '../contracts/constants';
+import {FilterType} from '../contracts/constants';
 
 export default class FilterModel extends Observable{
-	#currentFilter: FILTER_TYPE = FilterType.ALL;
+	#currentFilter: FilterType = FilterType.ALL;
 	constructor () {
 		super();
 	}
@@ -11,7 +11,7 @@ export default class FilterModel extends Observable{
 		return this.#currentFilter;
 	}
 
-	changeFilter(newFilter: FILTER_TYPE) {
+	changeFilter(newFilter: FilterType) {
 		this.#currentFilter = newFilter;
 		this._notify('Change', this.filter);
 	}
