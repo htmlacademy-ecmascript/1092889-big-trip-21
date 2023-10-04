@@ -113,12 +113,12 @@ class EventEditView extends AbstractStatefulView<Point | BlankPoint, HTMLFormEle
     });
   };
 
-  startDateChange = (dateObj: Date[]) => {
-    this._setState({dateFrom: dateObj[0], offers: this.#getCheckedOffers()});
+  startDateChange = (pickedDate: Date[]) => {
+    this._setState({dateFrom: pickedDate[0], offers: this.#getCheckedOffers()});
   };
 
-  endDateChange = (dateObj: Date[]) => {
-    this._setState({dateTo: dateObj[0], offers: this.#getCheckedOffers()});
+  endDateChange = (pickedDate: Date[]) => {
+    this._setState({dateTo: pickedDate[0], offers: this.#getCheckedOffers()});
   };
 
   #removeListeners = () => {
