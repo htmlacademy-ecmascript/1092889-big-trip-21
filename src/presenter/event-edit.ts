@@ -1,5 +1,5 @@
 import {EventListItemView} from '../view/event-list-item';
-import {Destination, EventType, Point} from '../contracts/contracts';
+import {BlankPoint, Destination, EventType, Point} from '../contracts/contracts';
 import PointsModel from '../model/points';
 import DestinationsModel from '../model/destinations';
 import OffersModel from '../model/offers';
@@ -10,7 +10,7 @@ import AbstractPresenter from './abstract';
 
 interface EditEventPresenterHandlers {
 	switchEvent: SwitchEventsHandler,
-	cancelEventAdd: (param: null) => void
+	cancelEventAdd: (param: null) => void,
 }
 
 interface EventEditPresenterProps {
@@ -24,7 +24,7 @@ interface EventEditPresenterProps {
 
 export default class EventEditPresenter extends AbstractPresenter{
 	#container: EventListItemView;
-	#state: Point ;
+	#state: Point | BlankPoint;
 	target: EventEditView;
 	#id: Point['id'] | '';
 	#pointsModel: PointsModel;
@@ -62,6 +62,7 @@ export default class EventEditPresenter extends AbstractPresenter{
 		getOffersByType: this.#getOffersByType,
 		getOffersById: this.#getOffersById,
 		getDestinationByName: this.#getDestinationByName,
+		getDestinationTemplate: this.#destinationsModel.destinationTemplate,
 		switchHandler: this.handlers.switchEvent,
 		deletePoint: this.#deletePoint,
 		updatePoint: this.#updatePoint,
@@ -69,16 +70,28 @@ export default class EventEditPresenter extends AbstractPresenter{
 		createPoint: this.#createPoint
 	});
 
-	#updatePoint = (state: Point) => {
-		this.#pointsModel.updatePoint(state);
+	#updatePoint = async (state: Point) => {
+		try {
+			await this.#pointsModel.updatePoint(state);
+		} catch (e) {
+			throw new Error();
+		}
 	};
 
-	#deletePoint = (id: Point['id']) => {
-		this.#pointsModel.delete(id);
+	#deletePoint = async (id: Point['id']) => {
+		try {
+			await this.#pointsModel.delete(id);
+		} catch (e) {
+			throw new Error();
+		}
 	};
 
-	#createPoint = (state: Point) => {
-		this.#pointsModel.createPoint(state);
+	#createPoint = async (state: Point) => {
+		try {
+			await this.#pointsModel.createPoint(state);
+		} catch (e) {
+			throw new Error();
+		}
 	};
 
 	#cancelEventAdd = () => {

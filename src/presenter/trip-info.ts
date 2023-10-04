@@ -74,7 +74,7 @@ export default class TripInfoPresenter {
 		const points = this.#pointsModel.points!;
 		const sortedPoints = [...points].sort((a,b) => a.dateFrom.getTime() - b.dateFrom.getTime());
 
-		return [dayjs(sortedPoints[0].dateFrom).format('MMM D').toString(),dayjs(sortedPoints.at(-1)!.dateTo).format('MMM D')];
+		return [dayjs(sortedPoints[0].dateFrom).format('D MMM').toString(),dayjs(sortedPoints.at(-1)!.dateTo).format('D MMM')];
 	};
 
 	#getDestinations = () => {

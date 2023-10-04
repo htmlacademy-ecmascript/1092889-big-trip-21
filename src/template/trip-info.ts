@@ -2,7 +2,7 @@ const getTripInfoTemplate = (destinations: string, price: number, dates: string[
 <div class="trip-info__main">
 <h1 class="trip-info__title">${destinations}</h1>
 
-<p class="trip-info__dates">${dates[0]}&nbsp;&mdash;&nbsp;${dates[1]}</p>
+<p class="trip-info__dates">${dates[0]} – ${dates[1]}</p>
 </div>
 
 <p class="trip-info__cost">

@@ -49,8 +49,12 @@ export default class EventPresenter extends AbstractPresenter{
 		return this.#container;
 	}
 
-	#updateFavourite = () => {
-		this.#handlers.updateFavourite(this.#state);
+	#updateFavourite = async () => {
+		try {
+			await this.#handlers.updateFavourite(this.#state);
+		} catch {
+			throw new Error();
+		}
 	};
 
 

@@ -1,6 +1,6 @@
 import {TripSortView} from '../view/trip-sort';
 import {remove, render, replace} from '../framework/render';
-import {SORT_TYPE, SortType} from '../contracts/constants';
+import {SortType} from '../contracts/constants';
 import {Point} from '../contracts/contracts';
 import FilterModel from '../model/filter';
 import PointsModel from '../model/points';
@@ -23,7 +23,7 @@ export default class TripSortPresenter {
 
 	constructor(props: TripSortPresenterProps) {
 		this.#container = props.container;
-		this.#target = this.#getTarget();
+		this.#target = null;
 		this.#filterModel = props.filterModel;
 		this.#pointsModel = props.pointsModel;
 		this.#getCurrentPoints = props.getCurrentPoints;
@@ -35,27 +35,20 @@ export default class TripSortPresenter {
 	#handlePointsModelChange = (updateType: unknown) => {
 		switch (updateType) {
 			case 'INIT': {
-				if(this.#pointsModel.points!.length === 0) {
+				if(this.#getCurrentPoints().length === 0) {
 					break;
 				}
-				this.#target = this.#getTarget();
-				this.render();
+				this.updateTarget();
 				break;
 			}
 			case 'MAJOR' : {
-				if(this.#pointsModel.points!.length === 0) {
+				if(this.#getCurrentPoints().length === 0) {
 					this.remove();
 					this.#target = null;
 					break;
 				}
-				if (!this.#target) {
-					this.#target = this.#getTarget();
-					this.render();
-					break;
-				}
-				const newTarget = this.#getTarget();
-				replace(newTarget,this.#target);
-				this.#target = newTarget;
+				this.updateTarget();
+				break;
 			}
 		}
 	};
@@ -64,12 +57,12 @@ export default class TripSortPresenter {
 		this.#currentSort = SortType.DAY;
 	};
 
-	#sortPoints = (value: SORT_TYPE) => {
-		const sortByPrice = (priceOne: Point, priceTwo: Point) => priceOne.basePrice - priceTwo.basePrice;
+	#sortPoints = (value: SortType) => {
+		const sortByPrice = (priceOne: Point, priceTwo: Point) => priceTwo.basePrice - priceOne.basePrice;
 		const sortByTime = (timeOne: Point, timeTwo: Point) => (timeOne.dateTo.getTime() - timeOne.dateFrom.getTime()) - (timeTwo.dateTo.getTime() - timeTwo.dateFrom.getTime());
 		const sortByDate = (dayOne: Point, dayTwo: Point) => dayOne.dateFrom.getTime() - dayTwo.dateFrom.getTime();
 
-		const sorts:Map<SORT_TYPE, (a: Point,b: Point) => number> = new Map ([
+		const sorts:Map<SortType, (a: Point,b: Point) => number> = new Map ([
 			[SortType.PRICE, sortByPrice],
 			[SortType.DAY, sortByDate],
 			[SortType.TIME, sortByTime]

@@ -1,4 +1,4 @@
-import {Point} from '../contracts/contracts';
+import {BlankPoint, Point} from '../contracts/contracts';
 import Observable from '../framework/observable';
 import EventsApiService from '../service/events-api-service';
 import {convertToPoint, convertToResponsePoint} from '../utils/adapters';
@@ -11,21 +11,15 @@ export default class PointsModel extends Observable {
 		this.#service = service;
 	}
 
-	getBlankPoint = ():Omit<Point, 'id'> => {
-		const dateFrom = new Date();
-		const dateTo = new Date();
-		dateTo.setSeconds(dateFrom.getSeconds() + 100);
-
-		return {
-			basePrice: 0,
-			dateFrom,
-			dateTo,
-			destination:'',
-			isFavorite: false,
-			offers: [],
-			type: 'flight'
-		};
-	};
+	getBlankPoint = ():Omit<BlankPoint, 'id'> => ({
+		basePrice: 0,
+		dateFrom: '',
+		dateTo: '',
+		destination:'',
+		isFavorite: false,
+		offers: [],
+		type: 'flight'
+	});
 
 	async init() {
 		try {

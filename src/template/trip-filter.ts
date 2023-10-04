@@ -1,23 +1,23 @@
 import {FilterType} from '../contracts/constants';
-
-const getTripFilterTemplate = (currentFilter: FilterType) => `<form class="trip-filters" action="#" method="get">
+import {Point} from '../contracts/contracts';
+const getTripFilterTemplate = (currentFilter: FilterType, filteredPoints: Map<FilterType, Point[]>) => `<form class="trip-filters" action="#" method="get">
                     <div class="trip-filters__filter">
-                      <input id="filter-everything" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="everything" ${(currentFilter === FilterType.ALL) ? 'checked' : ''}>
+                      <input id="filter-everything" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="everything" ${(currentFilter === FilterType.ALL) ? 'checked' : ''} ${(filteredPoints.get(FilterType.ALL)!.length) ? '' : 'disabled'}>
                       <label class="trip-filters__filter-label" for="filter-everything">Everything</label>
                     </div>
 
                     <div class="trip-filters__filter">
-                      <input id="filter-future" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="future" ${(currentFilter === FilterType.FUTURE) ? 'checked' : ''}>
+                      <input id="filter-future" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="future" ${(currentFilter === FilterType.FUTURE) ? 'checked' : ''} ${(filteredPoints.get(FilterType.FUTURE)!.length) ? '' : 'disabled'}>
                       <label class="trip-filters__filter-label" for="filter-future">Future</label>
                     </div>
 
                     <div class="trip-filters__filter">
-                      <input id="filter-present" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="present" ${(currentFilter === FilterType.PRESENT) ? 'checked' : ''}>
+                      <input id="filter-present" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="present" ${(currentFilter === FilterType.PRESENT) ? 'checked' : ''} ${(filteredPoints.get(FilterType.PRESENT)!.length) ? '' : 'disabled'}>
                       <label class="trip-filters__filter-label" for="filter-present">Present</label>
                     </div>
 
                     <div class="trip-filters__filter">
-                      <input id="filter-past" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="past" ${(currentFilter === FilterType.PAST) ? 'checked' : ''}>
+                      <input id="filter-past" class="trip-filters__filter-input  visually-hidden" type="radio" name="trip-filter" value="past" ${(currentFilter === FilterType.PAST) ? 'checked' : ''} ${(filteredPoints.get(FilterType.PAST)!.length) ? '' : 'disabled'}>
                       <label class="trip-filters__filter-label" for="filter-past">Past</label>
                     </div>
 

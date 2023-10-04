@@ -68,10 +68,10 @@ const getEventEditTemplate = ({state, eventTypes, destinationsNames, destination
 
                       <div class="event__field-group  event__field-group--time">
                         <label class="visually-hidden" for="event-start-time-1">From</label>
-                        <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${dayjs(state.dateFrom).format('YY/MM/DD hh:mm')}">
+                        <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${(state.dateFrom) ? dayjs(state.dateFrom).format('DD/MM/YY hh:mm') : ''}">
                         &mdash;
                         <label class="visually-hidden" for="event-end-time-1">To</label>
-                        <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${dayjs(state.dateTo).format('YY/MM/DD hh:mm')}">
+                        <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${(state.dateFrom) ? dayjs(state.dateTo).format('DD/MM/YY hh:mm') : ''}">
                       </div>
 
                       <div class="event__field-group  event__field-group--price">

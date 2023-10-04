@@ -26,6 +26,15 @@ export default class DestinationsModel extends Observable{
 		return this.#destinations;
 	}
 
+	get destinationTemplate() {
+		return ({
+			id: '',
+			name: '',
+			description: '',
+			pictures: []
+		});
+	}
+
 	get destinationsNames() {
 		return this.#destinationsNames;
 	}
