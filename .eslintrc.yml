@@ -10,12 +10,6 @@ env:
 
 extends: htmlacademy/vanilla
 
-rules:
-  indent:
-    - error
-    - tab
-    - SwitchCase: 1
-
 overrides:
   - files:
       - '*.ts'

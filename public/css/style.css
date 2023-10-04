@@ -118,7 +118,7 @@ main {
   font-family: inherit;
   text-decoration: none;
   -webkit-user-select: none;
-     -moz-user-select: none;
+    -moz-user-select: none;
       -ms-user-select: none;
           user-select: none;
   border: none;
@@ -251,7 +251,7 @@ main {
   line-height: 25px;
   text-decoration: none;
   -webkit-user-select: none;
-     -moz-user-select: none;
+    -moz-user-select: none;
       -ms-user-select: none;
           user-select: none;
   color: inherit;
@@ -288,7 +288,7 @@ main {
   letter-spacing: 0.5px;
   text-transform: uppercase;
   -webkit-user-select: none;
-     -moz-user-select: none;
+    -moz-user-select: none;
       -ms-user-select: none;
           user-select: none;
   opacity: 0.6;
@@ -457,7 +457,7 @@ main {
   padding: 0;
   border: 1px solid #0d8ae4;
   -webkit-user-select: none;
-     -moz-user-select: none;
+    -moz-user-select: none;
       -ms-user-select: none;
           user-select: none;
   cursor: pointer; }
@@ -500,7 +500,7 @@ main {
   font-size: 17px;
   line-height: 21px;
   -webkit-user-select: none;
-     -moz-user-select: none;
+    -moz-user-select: none;
       -ms-user-select: none;
           user-select: none;
   cursor: pointer;
@@ -658,7 +658,7 @@ main {
   line-height: inherit;
   font-family: inherit;
   -webkit-appearance: none;
-     -moz-appearance: none;
+    -moz-appearance: none;
           appearance: none;
   border: none; }
   .event__input--destination {
@@ -682,7 +682,7 @@ main {
   line-height: 21px;
   font-family: inherit;
   -webkit-user-select: none;
-     -moz-user-select: none;
+    -moz-user-select: none;
       -ms-user-select: none;
           user-select: none;
   color: #0d8ae4;
@@ -786,7 +786,7 @@ main {
   font-size: 17px;
   line-height: 21px;
   -webkit-user-select: none;
-     -moz-user-select: none;
+    -moz-user-select: none;
       -ms-user-select: none;
           user-select: none;
   background-color: #f2f2f2;
