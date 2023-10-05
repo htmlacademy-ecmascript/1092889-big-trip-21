@@ -11,13 +11,12 @@ const pageFiltersContainer = document.querySelector('.trip-controls__filters') a
 
 
 if (!pageHeader || !pageFiltersContainer || ! pageEventsContainer) {
-	throw new Error('Missing main template');
+  throw new Error('Missing main template');
 }
 const enum Tokens {
-	AUTHORIZATION = 'Basic 9f7993d6-c582-42c5-a163-3b080c21af6f',
-	END_POINT = 'https://21.objects.pages.academy/big-trip'
+  AUTHORIZATION = 'Basic 9f7993d6-c5823-42c5-a163-3b080c21af6f',
+  END_POINT = 'https://21.objects.pages.academy/big-trip'
 }
-
 
 const eventsApiService = new EventsApiService(Tokens.END_POINT, Tokens.AUTHORIZATION);
 
@@ -27,10 +26,8 @@ const offersModel = new OffersModel(eventsApiService);
 const filterModel = new FilterModel();
 
 new ControllersPresenter({
-	pointsModel: pointsModel,
-	offersModel: offersModel,
-	destinationsModel: destinationsModel,
-	filterModel: filterModel}
+  pointsModel: pointsModel,
+  offersModel: offersModel,
+  destinationsModel: destinationsModel,
+  filterModel: filterModel}
 );
-
-

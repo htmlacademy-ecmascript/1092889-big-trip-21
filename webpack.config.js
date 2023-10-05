@@ -12,48 +12,47 @@ export default {
     path: resolve(__dirname, 'build'),
     clean: true
   },
-	resolve: {
-		extensions: ['.ts', '.js'],
-	},
+  resolve: {
+    extensions: ['.ts', '.js'],
+  },
   devtool: 'source-map',
 
   plugins: [
 
     new CopyPlugin({
       patterns: [{
-		  from: 'public',
-		  globOptions: {
-			  ignore: ['**/index.html'],
-		  },
-	  	}],
-	}),
+      from: 'public',
+      globOptions: {
+        ignore: ['**/index.html'],
+      },
+      }],
+  }),
 
-	new HtmlWebpackPlugin({
-		template: './public/index.html'
-		})
+  new HtmlWebpackPlugin({
+    template: './public/index.html'
+    })
 ],
   module: {
     rules: [
-		{
-			test: /\.js$/,
-			use: {
-				loader: 'babel-loader',
-				options: {
-					presets: ['@babel/preset-env'],
-				},
-			},
-			exclude: /(node_modules)/,
-		},
-		{
-			test: /\.css$/,
-			use: ['style-loader', 'css-loader'],
-		},
-      	{
-        	test: /\.ts$/,
-        	use: 'ts-loader',
-        	exclude: /(node_modules)/,
-      	}
+    {
+      test: /\.js$/,
+      use: {
+        loader: 'babel-loader',
+        options: {
+          presets: ['@babel/preset-env'],
+        },
+      },
+      exclude: /(node_modules)/,
+    },
+    {
+      test: /\.css$/,
+      use: ['style-loader', 'css-loader'],
+    },
+        {
+          test: /\.ts$/,
+          use: 'ts-loader',
+          exclude: /(node_modules)/,
+        }
     ],
   },
 }
-
