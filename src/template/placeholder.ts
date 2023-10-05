@@ -2,13 +2,13 @@ import {FilterType} from '../contracts/constants';
 
 const getTextForFilterType = (filterType: FilterType): string => {
   switch (filterType) {
-    case ('present'): {
+    case (FilterType.PRESENT): {
       return 'There are no present events now';
     }
-    case ('past'): {
+    case (FilterType.PAST): {
       return 'There are no past events now';
     }
-    case ('future'): {
+    case (FilterType.FUTURE): {
       return 'There are no future events now';
     }
     default : {

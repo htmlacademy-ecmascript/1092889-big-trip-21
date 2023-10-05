@@ -78,7 +78,7 @@ export default class TripInfoPresenter {
   };
 
   #getDestinations = () => {
-    const currentDestinations = this.#pointsModel.points!.sort((a,b) => a.dateFrom.getTime() - b.dateFrom.getTime()).map((point) => this.#destinationsModel.getById(point.destination));
+    const currentDestinations = [...this.#pointsModel.points!].sort((a,b) => a.dateFrom.getTime() - b.dateFrom.getTime()).map((point) => this.#destinationsModel.getById(point.destination));
     return currentDestinations.map((destination) => destination.name);
 
   };
