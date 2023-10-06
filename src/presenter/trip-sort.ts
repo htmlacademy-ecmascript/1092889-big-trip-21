@@ -59,7 +59,7 @@ export default class TripSortPresenter {
 
   #sortPoints = (value: SortType) => {
     const sortByPrice = (priceOne: Point, priceTwo: Point) => priceTwo.basePrice - priceOne.basePrice;
-    const sortByTime = (timeOne: Point, timeTwo: Point) => (timeOne.dateTo.getTime() - timeOne.dateFrom.getTime()) - (timeTwo.dateTo.getTime() - timeTwo.dateFrom.getTime());
+    const sortByTime = (timeOne: Point, timeTwo: Point) => (timeTwo.dateTo.getTime() - timeTwo.dateFrom.getTime()) - (timeOne.dateTo.getTime() - timeOne.dateFrom.getTime());
     const sortByDate = (dayOne: Point, dayTwo: Point) => dayOne.dateFrom.getTime() - dayTwo.dateFrom.getTime();
 
     const sorts:Map<SortType, (a: Point,b: Point) => number> = new Map ([

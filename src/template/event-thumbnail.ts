@@ -18,9 +18,9 @@ const getEventThumbnailTemplate = (state: Point, offers: Offer[], destination: D
                     <h3 class="event__title">${state.type} ${destination.name}</h3>
                     <div class="event__schedule">
                       <p class="event__time">
-                        <time class="event__start-time" datetime="${state.dateFrom}">${dayjs(state.dateFrom).format('hh mm')}</time>
+                        <time class="event__start-time" datetime="${state.dateFrom}">${dayjs(state.dateFrom).format('HH:mm')}</time>
                         &mdash;
-                        <time class="event__end-time" datetime="${state.dateTo}">${dayjs(state.dateTo).format('hh mm')}</time>
+                        <time class="event__end-time" datetime="${state.dateTo}">${dayjs(state.dateTo).format('HH:mm')}</time>
                       </p>
                       <p class="event__duration">${duration}</p>
                     </div>
